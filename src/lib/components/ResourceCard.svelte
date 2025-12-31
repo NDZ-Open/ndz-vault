@@ -89,6 +89,10 @@
 	@media (max-width: 640px) {
 		.card {
 			padding: 1.25rem;
+			width: 100%;
+			max-width: 100%;
+			box-sizing: border-box;
+			min-width: 0;
 		}
 
 		.card-icon {

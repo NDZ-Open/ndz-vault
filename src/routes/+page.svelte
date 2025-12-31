@@ -8,8 +8,6 @@
 	
 	let selectedCategory: string | null = null;
 	let searchQuery = '';
-	let currentPage = 1;
-	const itemsPerPage = 12;
 	
 	$: filteredResources = getAllResources().filter(resource => {
 		const matchesCategory = !selectedCategory || resource.category === selectedCategory;
@@ -21,33 +19,9 @@
 	});
 	
 	$: totalResources = getAllResources().length;
-	$: totalPages = Math.ceil(filteredResources.length / itemsPerPage);
-	$: {
-		// Reset to page 1 if current page is out of bounds
-		if (currentPage > totalPages && totalPages > 0) {
-			currentPage = 1;
-		}
-	}
-	$: paginatedResources = filteredResources.slice(
-		(currentPage - 1) * itemsPerPage,
-		currentPage * itemsPerPage
-	);
 	
 	function selectCategory(categoryId: string | null) {
 		selectedCategory = selectedCategory === categoryId ? null : categoryId;
-		currentPage = 1; // Reset to first page when category changes
-	}
-	
-	// Reset page when search changes
-	function handleSearchInput() {
-		if (currentPage !== 1) {
-			currentPage = 1;
-		}
-	}
-	
-	function goToPage(page: number) {
-		currentPage = page;
-		window.scrollTo({ top: 0, behavior: 'smooth' });
 	}
 </script>
 
@@ -136,13 +110,12 @@
 							type="text" 
 							placeholder="Search resources..." 
 							bind:value={searchQuery}
-							on:input={handleSearchInput}
 							class="search-input"
 						/>
 					</div>
 					
 					<div class="resources-grid">
-						{#each paginatedResources as resource}
+						{#each filteredResources as resource}
 							<ResourceCard {resource} />
 						{/each}
 					</div>
@@ -150,38 +123,6 @@
 					{#if filteredResources.length === 0}
 						<div class="no-results">
 							<p>No resources found. Try a different search or category.</p>
-						</div>
-					{:else if totalPages > 1}
-						<div class="pagination">
-							<button 
-								class="pagination-button"
-								disabled={currentPage === 1}
-								on:click={() => goToPage(currentPage - 1)}
-							>
-								Previous
-							</button>
-							<div class="pagination-pages">
-								{#each Array(totalPages) as _, i}
-									{@const page = i + 1}
-									{#if page === 1 || page === totalPages || (page >= currentPage - 1 && page <= currentPage + 1)}
-										<button
-											class="pagination-page {currentPage === page ? 'active' : ''}"
-											on:click={() => goToPage(page)}
-										>
-											{page}
-										</button>
-									{:else if page === currentPage - 2 || page === currentPage + 2}
-										<span class="pagination-ellipsis">...</span>
-									{/if}
-								{/each}
-							</div>
-							<button 
-								class="pagination-button"
-								disabled={currentPage === totalPages}
-								on:click={() => goToPage(currentPage + 1)}
-							>
-								Next
-							</button>
 						</div>
 					{/if}
 				</div>
@@ -216,6 +157,7 @@
 
 	.nav {
 		display: flex;
+		align-items: center;
 		gap: 2rem;
 	}
 
@@ -223,6 +165,9 @@
 		color: var(--text-secondary);
 		font-size: 0.9rem;
 		transition: color 0.2s;
+		display: flex;
+		align-items: center;
+		line-height: 1;
 	}
 
 	.nav-link:hover,
@@ -442,6 +387,23 @@
 		grid-column: 2;
 	}
 
+	@media (max-width: 968px) {
+		.resources-layout {
+			display: flex;
+			flex-direction: column;
+			gap: 2rem;
+		}
+
+		.sidebar {
+			grid-column: unset;
+			position: static;
+		}
+
+		.resources-main {
+			grid-column: unset;
+		}
+	}
+
 	.sidebar-header {
 		margin-bottom: 1.5rem;
 		padding-bottom: 1.5rem;
@@ -540,99 +502,41 @@
 		color: var(--text-secondary);
 	}
 
-	.pagination {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		gap: 1rem;
-		margin-top: 3rem;
-		padding: 2rem 0;
-	}
-
-	.pagination-button {
-		padding: 0.75rem 1.5rem;
-		background: var(--section-bg);
-		border: 1px solid rgba(255, 255, 255, 0.1);
-		border-radius: 8px;
-		color: var(--text-primary);
-		font-size: 0.9rem;
-		cursor: pointer;
-		transition: all 0.2s;
-	}
-
-	.pagination-button:hover:not(:disabled) {
-		background: rgba(255, 255, 255, 0.05);
-		border-color: var(--button-color);
-	}
-
-	.pagination-button:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
-	}
-
-	.pagination-pages {
-		display: flex;
-		gap: 0.5rem;
-		align-items: center;
-	}
-
-	.pagination-page {
-		min-width: 40px;
-		height: 40px;
-		padding: 0.5rem;
-		background: var(--section-bg);
-		border: 1px solid rgba(255, 255, 255, 0.1);
-		border-radius: 8px;
-		color: var(--text-primary);
-		font-size: 0.9rem;
-		cursor: pointer;
-		transition: all 0.2s;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
-
-	.pagination-page:hover {
-		background: rgba(255, 255, 255, 0.05);
-		border-color: var(--button-color);
-	}
-
-	.pagination-page.active {
-		background: rgba(0, 235, 152, 0.1);
-		border-color: var(--button-color);
-		color: var(--button-color);
-	}
-
-	.pagination-ellipsis {
-		color: var(--text-secondary);
-		padding: 0 0.5rem;
-	}
-
 	@media (max-width: 968px) {
-		.resources-layout {
-			grid-template-columns: 1fr;
-		}
-
 		.sidebar {
-			position: static;
-			padding: 1.5rem;
+			padding: 1rem;
 			width: 100%;
+			overflow: hidden;
 		}
 
 		.sidebar-header {
-			margin-bottom: 1.5rem;
-			padding-bottom: 1.5rem;
+			margin-bottom: 1rem;
+			padding-bottom: 1rem;
 		}
 
 		.sidebar-filters {
-			display: grid;
-			grid-template-columns: repeat(2, 1fr);
-			gap: 0.5rem;
+			display: flex;
+			flex-direction: row;
+			overflow-x: auto;
+			overflow-y: hidden;
+			gap: 0.75rem;
+			padding-bottom: 0.5rem;
+			-webkit-overflow-scrolling: touch;
+			scrollbar-width: none;
+			-ms-overflow-style: none;
+		}
+
+		.sidebar-filters::-webkit-scrollbar {
+			display: none;
 		}
 
 		.sidebar-filter {
-			width: 100%;
+			flex-shrink: 0;
+			width: auto;
+			min-width: fit-content;
 			margin-bottom: 0;
+			padding: 0.75rem 1.25rem;
+			white-space: nowrap;
 		}
 
 		.hero-title {
@@ -648,24 +552,48 @@
 			grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
 			gap: 1.25rem;
 		}
-
-		.pagination {
-			flex-wrap: wrap;
-			gap: 0.75rem;
-		}
-
-		.pagination-pages {
-			gap: 0.25rem;
-		}
-
-		.pagination-page {
-			min-width: 36px;
-			height: 36px;
-			font-size: 0.85rem;
-		}
 	}
 
 	@media (max-width: 640px) {
+		.resources-section {
+			padding: 2rem 0;
+			overflow-x: hidden;
+		}
+
+		.resources-layout {
+			overflow-x: hidden;
+		}
+
+		.sidebar {
+			padding: 0.75rem 1rem;
+			width: 100%;
+			max-width: 100%;
+			overflow-x: hidden;
+		}
+
+		.sidebar-filters {
+			gap: 0.5rem;
+			padding-bottom: 0.25rem;
+		}
+
+		.sidebar-filter {
+			padding: 0.625rem 1rem;
+			font-size: 0.9rem;
+		}
+
+		.resources-main {
+			width: 100%;
+			max-width: 100%;
+			overflow-x: hidden;
+		}
+
+		.resources-grid {
+			grid-template-columns: 1fr;
+			gap: 1rem;
+			width: 100%;
+			max-width: 100%;
+		}
+
 		.hero {
 			padding: 4rem 0;
 		}
@@ -677,37 +605,6 @@
 
 		.hero-subtitle {
 			font-size: 1rem;
-		}
-
-		.sidebar {
-			padding: 1rem;
-		}
-
-		.sidebar-filters {
-			grid-template-columns: 1fr;
-		}
-
-		.resources-grid {
-			grid-template-columns: 1fr;
-			gap: 1rem;
-		}
-
-		.resources-section {
-			padding: 2rem 0;
-		}
-
-		.pagination {
-			flex-direction: column;
-			gap: 1rem;
-		}
-
-		.pagination-button {
-			width: 100%;
-		}
-
-		.pagination-pages {
-			width: 100%;
-			justify-content: center;
 		}
 	}
 </style>

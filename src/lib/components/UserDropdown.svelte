@@ -45,6 +45,8 @@
 		cursor: pointer;
 		font-size: 0.9rem;
 		transition: all 0.2s;
+		line-height: 1;
+		height: fit-content;
 	}
 	
 	.user-button:hover {
