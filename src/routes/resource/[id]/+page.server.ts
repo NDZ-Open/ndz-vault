@@ -14,6 +14,7 @@ export const load: PageServerLoad = async ({ params, cookies, fetch }) => {
 		try {
 			const FLARUM_URL = import.meta.env.FLARUM_URL || 'https://ndz.ng';
 			const cookieHeader = `flarum_session=${sessionCookie}${rememberCookie ? `; flarum_remember=${rememberCookie}` : ''}`;
+			
 			const response = await fetch(`${FLARUM_URL}/api`, {
 				headers: {
 					'Cookie': cookieHeader,
@@ -25,6 +26,7 @@ export const load: PageServerLoad = async ({ params, cookies, fetch }) => {
 			if (response.ok) {
 				const data = await response.json();
 				
+				// Check for valid user data
 				if (data.data && data.data.id && data.data.attributes && data.data.attributes.username) {
 					user = {
 						id: data.data.id,
