@@ -53,9 +53,15 @@ export const handle: Handle = async ({ event, resolve }) => {
             authenticated: true,
           };
         }
+      } else {
+        // If Flarum API returns non-OK, cookie might be invalid
+        // Don't redirect here - let the page handle it
+        // This prevents infinite redirect loops
       }
     } catch (err) {
       // Validation failed - user stays null
+      // Don't throw or redirect - just let the request continue
+      // This prevents infinite redirect loops
     }
   }
 
