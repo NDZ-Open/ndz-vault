@@ -25,16 +25,30 @@ export const load: PageServerLoad = async ({ params, cookies, fetch, request }) 
 				const data = await response.json();
 				
 				// Flarum returns user in data.data when authenticated
-				// Anonymous users have ID 0 or negative, authenticated users have ID > 0
-				if (data.data && data.data.id && data.data.id > 0 && data.data.attributes && data.data.attributes.username) {
+				// STRICT: Only authenticate if we have a valid user with ID > 0 AND username exists
+				// Anonymous/guest users typically have ID 0, 1, or no username
+				const userData = data.data;
+				
+				if (
+					userData && 
+					userData.id && 
+					typeof userData.id === 'number' &&
+					userData.id > 1 && // Most forums use ID 1 for admin, so > 1 is safer
+					userData.attributes && 
+					userData.attributes.username &&
+					userData.attributes.username.trim() !== '' &&
+					userData.attributes.username !== 'Guest' &&
+					userData.attributes.username !== 'Anonymous'
+				) {
 					user = {
-						id: data.data.id,
-						username: data.data.attributes.username,
-						displayName: data.data.attributes.displayName || data.data.attributes.username,
-						email: data.data.attributes.email,
-						avatarUrl: data.data.attributes.avatarUrl
+						id: userData.id,
+						username: userData.attributes.username,
+						displayName: userData.attributes.displayName || userData.attributes.username,
+						email: userData.attributes.email,
+						avatarUrl: userData.attributes.avatarUrl
 					};
 				}
+				// If conditions not met, user stays null
 			}
 		} catch (err) {
 			// Fail silently - user stays null
