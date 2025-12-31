@@ -1,61 +1,76 @@
+import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { getResourceById, categories } from '$lib/data/resources';
 
-export const load: PageServerLoad = async ({ params, cookies, fetch }) => {
+export const load: PageServerLoad = async ({ params, cookies, fetch, request, url }) => {
 	const resource = getResourceById(params.id || '');
 	const category = resource ? categories.find(c => c.id === resource.category) : null;
 	
-	// Check if user is logged in by calling Flarum API directly
-	let user = null;
+	// Check if user is logged in - REQUIRED to access resources
 	const sessionCookie = cookies.get('flarum_session');
 	const rememberCookie = cookies.get('flarum_remember');
+	const FLARUM_URL = import.meta.env.FLARUM_URL || 'https://ndz.ng';
 	
-	// Debug: log cookie status
-	console.log('Session cookie present:', !!sessionCookie);
-	console.log('Remember cookie present:', !!rememberCookie);
+	// Get current vault URL dynamically
+	function getVaultUrl(): string {
+		const urlObj = new URL(request.url);
+		return `${urlObj.protocol}//${urlObj.host}`;
+	}
+	const VAULT_URL = getVaultUrl();
 	
-	if (sessionCookie) {
-		try {
-			const FLARUM_URL = import.meta.env.FLARUM_URL || 'https://ndz.ng';
-			const cookieHeader = `flarum_session=${sessionCookie}${rememberCookie ? `; flarum_remember=${rememberCookie}` : ''}`;
-			
-			console.log('Calling Flarum API:', `${FLARUM_URL}/api`);
-			
-			const response = await fetch(`${FLARUM_URL}/api`, {
-				headers: {
-					'Cookie': cookieHeader,
-					'Accept': 'application/json'
-				},
-				credentials: 'include'
-			});
+	if (!sessionCookie) {
+		// Not logged in - redirect to Flarum login
+		const returnUrl = `${VAULT_URL}${url.pathname}${url.search}`;
+		throw redirect(302, `${FLARUM_URL}/login?return=${encodeURIComponent(returnUrl)}`);
+	}
+	
+	// Verify session with Flarum API
+	let user = null;
+	try {
+		const cookieHeader = `flarum_session=${sessionCookie}${rememberCookie ? `; flarum_remember=${rememberCookie}` : ''}`;
+		const response = await fetch(`${FLARUM_URL}/api`, {
+			headers: {
+				'Cookie': cookieHeader,
+				'Accept': 'application/json'
+			},
+			credentials: 'include'
+		});
 
-			console.log('Flarum API response status:', response.status);
-
-			if (response.ok) {
-				const data = await response.json();
-				console.log('Flarum API data:', data);
-				
-				if (data.data && data.data.id) {
-					user = {
-						id: data.data.id,
-						username: data.data.attributes.username,
-						displayName: data.data.attributes.displayName,
-						email: data.data.attributes.email,
-						avatarUrl: data.data.attributes.avatarUrl
-					};
-					console.log('User authenticated:', user.displayName);
-				} else {
-					console.log('No user data in response');
-				}
+		if (response.ok) {
+			const data = await response.json();
+			
+			if (data.data && data.data.id) {
+				user = {
+					id: data.data.id,
+					username: data.data.attributes.username,
+					displayName: data.data.attributes.displayName || data.data.attributes.username,
+					email: data.data.attributes.email,
+					avatarUrl: data.data.attributes.avatarUrl
+				};
 			} else {
-				console.log('Flarum API returned error:', response.status, response.statusText);
+				// Invalid session - redirect to login
+				const returnUrl = `${VAULT_URL}${url.pathname}${url.search}`;
+				throw redirect(302, `${FLARUM_URL}/login?return=${encodeURIComponent(returnUrl)}`);
 			}
-		} catch (err) {
-			// User not logged in, that's fine - page is still accessible
-			console.error('Authentication error:', err);
+		} else {
+			// Invalid session - redirect to login
+			const returnUrl = `${VAULT_URL}${url.pathname}${url.search}`;
+			throw redirect(302, `${FLARUM_URL}/login?return=${encodeURIComponent(returnUrl)}`);
 		}
-	} else {
-		console.log('No session cookie found');
+	} catch (err) {
+		// If it's a redirect, re-throw it
+		if (err && typeof err === 'object' && 'status' in err && err.status === 302) {
+			throw err;
+		}
+		// Other errors - redirect to login
+		const returnUrl = `${VAULT_URL}${url.pathname}${url.search}`;
+		throw redirect(302, `${FLARUM_URL}/login?return=${encodeURIComponent(returnUrl)}`);
+	}
+	
+	// User must be authenticated to reach here
+	if (!user) {
+		const returnUrl = `${VAULT_URL}${url.pathname}${url.search}`;
+		throw redirect(302, `${FLARUM_URL}/login?return=${encodeURIComponent(returnUrl)}`);
 	}
 	
 	return {

@@ -1,37 +1,14 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import LoginButton from '$lib/components/LoginButton.svelte';
-	import { onMount } from 'svelte';
 	
 	export let data: PageData;
 	
 	$: resource = data.resource;
 	$: category = data.category;
 	$: user = data.user;
-	$: isAuthenticated = !!user;
 	
-	// Client-side authentication check as fallback
-	let clientUser = data.user;
-	
-	onMount(async () => {
-		// If server-side check didn't find user, try client-side
-		if (!user) {
-			try {
-				const response = await fetch('/api/flarum-me');
-				if (response.ok) {
-					clientUser = await response.json();
-					console.log('Client-side auth successful:', clientUser);
-				} else {
-					console.log('Client-side auth failed:', response.status);
-				}
-			} catch (err) {
-				console.error('Client-side auth error:', err);
-			}
-		}
-	});
-	
-	$: finalUser = user || clientUser;
-	$: finalIsAuthenticated = !!finalUser;
+	// User is guaranteed to be authenticated at this point (server enforces it)
+	$: displayName = user?.displayName || user?.username || 'User';
 	
 	const testimonials = [
 		{
@@ -89,10 +66,6 @@
 				</a>
 				<nav class="nav">
 					<a href="/" class="nav-link">Back to Vault</a>
-					{#if finalIsAuthenticated && finalUser}
-						<span class="user-name">{finalUser.displayName}</span>
-						<a href="https://ndz.ng/logout" class="nav-link">Log out</a>
-					{/if}
 				</nav>
 			</div>
 		</div>
@@ -130,45 +103,32 @@
 					</div>
 				</div>
 
-				<!-- Right: Download/Login Section -->
+				<!-- Right: Download Section -->
 				<div class="form-section">
 					<div class="form-card">
-						{#if finalIsAuthenticated && finalUser}
-							<h2 class="form-title">Download Resource</h2>
-							<p class="form-subtitle">You're logged in as {finalUser.displayName}</p>
-							
-							<div class="resource-download">
-								<div class="download-icon-wrapper">
-									<div class="download-icon">{resource.icon || '📄'}</div>
-								</div>
-								<h3>{resource.title}</h3>
-								<div class="download-tags">
-									{#each resource.tags as tag}
-										<span class="tag">{tag}</span>
-									{/each}
-								</div>
-								
-								<button class="download-button">
-									<span>Download Resource</span>
-									<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-										<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-										<polyline points="7 10 12 15 17 10"></polyline>
-										<line x1="12" y1="15" x2="12" y2="3"></line>
-									</svg>
-								</button>
+						<h2 class="form-title">Download Resource</h2>
+						<p class="form-subtitle">You're logged in as {displayName}</p>
+						
+						<div class="resource-download">
+							<div class="download-icon-wrapper">
+								<div class="download-icon">{resource.icon || '📄'}</div>
 							</div>
-						{:else}
-							<h2 class="form-title">Get Your Resource</h2>
-							<p class="form-subtitle">Unlock Resource by Signing up or login</p>
-							
-							<div class="login-section">
-								<LoginButton returnPath="/resource/{resource.id}" />
-								<p class="login-note">
-									Don't have an account? 
-									<a href="https://ndz.ng/register" target="_blank" rel="noopener noreferrer">Sign up on NDZ</a>
-								</p>
+							<h3>{resource.title}</h3>
+							<div class="download-tags">
+								{#each resource.tags as tag}
+									<span class="tag">{tag}</span>
+								{/each}
 							</div>
-						{/if}
+							
+							<button class="download-button">
+								<span>Download Resource</span>
+								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+									<polyline points="7 10 12 15 17 10"></polyline>
+									<line x1="12" y1="15" x2="12" y2="3"></line>
+								</svg>
+							</button>
+						</div>
 					</div>
 				</div>
 			</section>
