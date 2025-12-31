@@ -7,5 +7,3 @@
 <slot />
 
 <Footer />
-
-<style>
