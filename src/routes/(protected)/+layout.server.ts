@@ -22,13 +22,16 @@ export const load: LayoutServerLoad = async ({ cookies, fetch, url, request }) =
 	}
 
 	try {
-		const cookieHeader = `flarum_session=${sessionCookie}${rememberCookie ? `; flarum_remember=${rememberCookie}` : ''}`;
+		// Forward ALL cookies from the browser request to Flarum
+		// This is critical - server fetch needs explicit cookie header
+		const cookieHeader = request.headers.get('cookie') || '';
+		
 		const response = await fetch(`${FLARUM_URL}/api`, {
 			headers: {
 				'Cookie': cookieHeader,
 				'Accept': 'application/json'
-			},
-			credentials: 'include'
+			}
+			// Don't use credentials: 'include' in server-side fetch - it's ignored
 		});
 
 		if (!response.ok) {

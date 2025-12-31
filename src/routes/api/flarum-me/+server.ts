@@ -1,46 +1,47 @@
-import { json, error } from '@sveltejs/kit';
-import type { RequestHandler } from './$types';
+import { json, error } from "@sveltejs/kit";
+import type { RequestHandler } from "./$types";
 
-const FLARUM_URL = import.meta.env.FLARUM_URL || 'https://ndz.ng';
+const FLARUM_URL = import.meta.env.FLARUM_URL || "https://ndz.ng";
 
-export const GET: RequestHandler = async ({ cookies, fetch }) => {
-	const sessionCookie = cookies.get('flarum_session');
-	const rememberCookie = cookies.get('flarum_remember');
-	
-	if (!sessionCookie) {
-		throw error(401, 'Not authenticated');
-	}
+export const GET: RequestHandler = async ({ cookies, fetch, request }) => {
+  const sessionCookie = cookies.get("flarum_session");
 
-	try {
-		const response = await fetch(`${FLARUM_URL}/api`, {
-			headers: {
-				'Cookie': `flarum_session=${sessionCookie}${rememberCookie ? `; flarum_remember=${rememberCookie}` : ''}`,
-				'Accept': 'application/json'
-			},
-			credentials: 'include'
-		});
+  if (!sessionCookie) {
+    throw error(401, "Not authenticated");
+  }
 
-		if (!response.ok) {
-			throw error(401, 'Invalid session');
-		}
+  try {
+    // Forward ALL cookies from the browser request to Flarum
+    // This is critical - server fetch needs explicit cookie header
+    const cookieHeader = request.headers.get("cookie") || "";
 
-		const data = await response.json();
-		
-		if (!data.data || !data.data.id) {
-			throw error(401, 'No user data');
-		}
+    const response = await fetch(`${FLARUM_URL}/api`, {
+      headers: {
+        Cookie: cookieHeader,
+        Accept: "application/json",
+      },
+      // Don't use credentials: 'include' in server-side fetch - it's ignored
+    });
 
-		return json({
-			id: data.data.id,
-			username: data.data.attributes.username,
-			email: data.data.attributes.email,
-			displayName: data.data.attributes.displayName,
-			avatarUrl: data.data.attributes.avatarUrl
-		});
-		
-	} catch (err) {
-		console.error('Flarum auth check failed:', err);
-		throw error(401, 'Authentication failed');
-	}
+    if (!response.ok) {
+      throw error(401, "Invalid session");
+    }
+
+    const data = await response.json();
+
+    if (!data.data || !data.data.id) {
+      throw error(401, "No user data");
+    }
+
+    return json({
+      id: data.data.id,
+      username: data.data.attributes.username,
+      email: data.data.attributes.email,
+      displayName: data.data.attributes.displayName,
+      avatarUrl: data.data.attributes.avatarUrl,
+    });
+  } catch (err) {
+    console.error("Flarum auth check failed:", err);
+    throw error(401, "Authentication failed");
+  }
 };
-
