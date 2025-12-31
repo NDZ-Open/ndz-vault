@@ -16,31 +16,17 @@ export const load: PageServerLoad = async ({ params, cookies, fetch, request }) 
 			// Forward ALL cookies from the browser request to Flarum
 			const cookieHeader = request.headers.get('cookie') || '';
 			
-			console.log('[AUTH] Checking authentication...');
-			console.log('[AUTH] Cookie header:', cookieHeader.substring(0, 150));
+			// Log for debugging (remove in production)
+			console.log('[AUTH] Session cookie from cookies.get():', sessionCookie.substring(0, 20) + '...');
+			console.log('[AUTH] Full cookie header from request:', cookieHeader);
 			console.log('[AUTH] Calling Flarum API:', `${FLARUM_URL}/api`);
 			
-			// Try Flarum's /api/users/me endpoint first (if it exists)
-			// Otherwise fall back to /api
-			let response = await fetch(`${FLARUM_URL}/api/users/me`, {
+			const response = await fetch(`${FLARUM_URL}/api`, {
 				headers: {
 					'Cookie': cookieHeader,
-					'Accept': 'application/json',
-					'User-Agent': 'NDZ-Vault/1.0'
+					'Accept': 'application/json'
 				}
 			});
-			
-			// If /api/users/me doesn't exist, try /api
-			if (!response.ok && response.status === 404) {
-				console.log('[AUTH] /api/users/me not found, trying /api');
-				response = await fetch(`${FLARUM_URL}/api`, {
-					headers: {
-						'Cookie': cookieHeader,
-						'Accept': 'application/json',
-						'User-Agent': 'NDZ-Vault/1.0'
-					}
-				});
-			}
 
 			console.log('[AUTH] Response status:', response.status, response.statusText);
 			console.log('[AUTH] Response headers:', Object.fromEntries(response.headers.entries()));
