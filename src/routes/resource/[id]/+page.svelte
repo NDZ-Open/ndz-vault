@@ -11,37 +11,12 @@
 	$: user = data.user;
 	$: isAuthenticated = !!user;
 	
-	// Client-side auth check as fallback
-	let clientUser = data.user;
-	
-	onMount(async () => {
-		// If server-side check didn't find user, try client-side
-		if (!user) {
-			try {
-				console.log('[CLIENT] Checking auth via /api/flarum-me');
-				const response = await fetch('/api/flarum-me');
-				console.log('[CLIENT] Response status:', response.status);
-				
-				if (response.ok) {
-					clientUser = await response.json();
-					console.log('[CLIENT] ✅ User authenticated:', clientUser.username);
-				} else {
-					const error = await response.text();
-					console.log('[CLIENT] ❌ Auth failed:', response.status, error);
-				}
-			} catch (err: any) {
-				console.error('[CLIENT] ❌ Auth error:', err);
-			}
-		} else {
-			console.log('[CLIENT] ✅ Server-side auth successful:', user.username);
-		}
-	});
-	
-	$: finalUser = user || clientUser;
-	$: finalIsAuthenticated = !!finalUser;
+	// Only use server-side authentication - no client-side fallback
+	// Client-side checks can be bypassed, so we only trust server-side
+	$: isAuthenticated = !!user;
 	
 	function handleDownload() {
-		if (!finalIsAuthenticated) {
+		if (!isAuthenticated || !user) {
 			// Redirect to Flarum login
 			const FLARUM_URL = 'https://ndz.ng';
 			window.location.href = `${FLARUM_URL}/login`;
@@ -151,7 +126,7 @@
 				<!-- Right: Download Section -->
 				<div class="form-section">
 					<div class="form-card">
-						{#if finalIsAuthenticated}
+						{#if isAuthenticated && user}
 							<button class="download-button" on:click={handleDownload}>
 								<span>Download Resource</span>
 								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

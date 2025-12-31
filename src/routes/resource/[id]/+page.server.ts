@@ -47,6 +47,7 @@ export const load: PageServerLoad = async ({ params, cookies, fetch, request }) 
 					userData = data.user;
 				}
 				
+				// STRICT check - only set user if we have valid user data with username
 				if (userData && userData.id && userData.attributes && userData.attributes.username) {
 					user = {
 						id: userData.id,
@@ -57,16 +58,24 @@ export const load: PageServerLoad = async ({ params, cookies, fetch, request }) 
 					};
 					console.log('[AUTH] ✅ User authenticated:', user.username);
 				} else {
+					// Explicitly set user to null if no valid data
+					user = null;
 					console.log('[AUTH] ❌ No valid user data found. Response structure:', JSON.stringify(data, null, 2).substring(0, 500));
 				}
 			} else {
+				// Explicitly set user to null on error
+				user = null;
 				const text = await response.text();
 				console.log('[AUTH] ❌ Flarum API error:', response.status, text.substring(0, 300));
 			}
 		} catch (err: any) {
+			// Explicitly set user to null on exception
+			user = null;
 			console.error('[AUTH] ❌ Exception:', err.message, err.stack);
 		}
 	} else {
+		// Explicitly set user to null if no cookie
+		user = null;
 		console.log('[AUTH] ❌ No session cookie found');
 	}
 	
