@@ -85,4 +85,31 @@
 		color: var(--text-secondary);
 		font-weight: 500;
 	}
+
+	@media (max-width: 640px) {
+		.card {
+			padding: 1.25rem;
+		}
+
+		.card-icon {
+			font-size: 1.75rem;
+			width: 44px;
+			height: 44px;
+		}
+
+		.card-title {
+			font-size: 1.1rem;
+			margin-bottom: 0.5rem;
+		}
+
+		.card-description {
+			font-size: 0.9rem;
+			margin-bottom: 0.75rem;
+		}
+
+		.tag {
+			font-size: 0.75rem;
+			padding: 0.3rem 0.65rem;
+		}
+	}
 </style>

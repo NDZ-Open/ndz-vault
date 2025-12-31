@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import LoginModal from '$lib/components/LoginModal.svelte';
+	import UserDropdown from '$lib/components/UserDropdown.svelte';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	
@@ -83,6 +84,7 @@
 				</a>
 				<nav class="nav">
 					<a href="/" class="nav-link">Back to Vault</a>
+					<UserDropdown user={data.user} />
 				</nav>
 			</div>
 		</div>
@@ -588,6 +590,28 @@
 	}
 
 	@media (max-width: 768px) {
+		.header {
+			padding: 1rem 0;
+		}
+
+		.header-content {
+			flex-wrap: wrap;
+			gap: 1rem;
+		}
+
+		.logo {
+			height: 32px;
+		}
+
+		.nav {
+			flex-wrap: wrap;
+			gap: 1rem;
+		}
+
+		.nav-link {
+			font-size: 0.85rem;
+		}
+
 		.resource-page {
 			padding: 2rem 0;
 		}
@@ -598,6 +622,20 @@
 
 		.form-card {
 			padding: 2rem 1.5rem;
+		}
+	}
+
+	@media (max-width: 640px) {
+		.nav {
+			gap: 0.75rem;
+		}
+
+		.nav-link {
+			font-size: 0.8rem;
+		}
+
+		.resource-title {
+			font-size: 2rem;
 		}
 	}
 </style>

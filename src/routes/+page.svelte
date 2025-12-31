@@ -1,6 +1,10 @@
 <script lang="ts">
 	import { categories, getAllResources, type Resource, type Category } from '$lib/data/resources';
 	import ResourceCard from '$lib/components/ResourceCard.svelte';
+	import UserDropdown from '$lib/components/UserDropdown.svelte';
+	import type { LayoutData } from './$types';
+	
+	export let data: LayoutData;
 	
 	let selectedCategory: string | null = null;
 	let searchQuery = '';
@@ -36,6 +40,7 @@
 				<a href="/" class="nav-link active">Home</a>
 				<a href="/" class="nav-link">Resources</a>
 				<a href="https://ndz.ng" target="_blank" rel="noopener noreferrer" class="nav-link">Forum</a>
+				<UserDropdown user={data.user} />
 			</nav>
 		</div>
 	</div>
@@ -164,6 +169,40 @@
 	.nav-link:hover,
 	.nav-link.active {
 		color: var(--text-primary);
+	}
+
+	@media (max-width: 768px) {
+		.header {
+			padding: 1rem 0;
+		}
+
+		.header-content {
+			flex-wrap: wrap;
+			gap: 1rem;
+		}
+
+		.logo {
+			height: 32px;
+		}
+
+		.nav {
+			flex-wrap: wrap;
+			gap: 1rem;
+		}
+
+		.nav-link {
+			font-size: 0.85rem;
+		}
+	}
+
+	@media (max-width: 640px) {
+		.nav {
+			gap: 0.75rem;
+		}
+
+		.nav-link {
+			font-size: 0.8rem;
+		}
 	}
 
 	.hero {
@@ -449,12 +488,37 @@
 
 		.sidebar {
 			position: static;
+			padding: 1rem;
+		}
+
+		.sidebar-header {
+			margin-bottom: 1rem;
+			padding-bottom: 1rem;
 		}
 
 		.sidebar-filters {
-			display: grid;
-			grid-template-columns: repeat(2, 1fr);
-			gap: 0.5rem;
+			display: flex;
+			flex-direction: row;
+			overflow-x: auto;
+			overflow-y: hidden;
+			gap: 0.75rem;
+			padding-bottom: 0.5rem;
+			-webkit-overflow-scrolling: touch;
+			scrollbar-width: none; /* Firefox */
+			-ms-overflow-style: none; /* IE and Edge */
+		}
+
+		.sidebar-filters::-webkit-scrollbar {
+			display: none; /* Chrome, Safari, Opera */
+		}
+
+		.sidebar-filter {
+			flex-shrink: 0;
+			width: auto;
+			min-width: fit-content;
+			margin-bottom: 0;
+			padding: 0.75rem 1.25rem;
+			white-space: nowrap;
 		}
 
 		.hero-title {
@@ -467,7 +531,8 @@
 		}
 
 		.resources-grid {
-			grid-template-columns: 1fr;
+			grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+			gap: 1.25rem;
 		}
 	}
 
@@ -485,8 +550,27 @@
 			font-size: 1rem;
 		}
 
+		.sidebar {
+			padding: 0.75rem;
+		}
+
 		.sidebar-filters {
+			gap: 0.5rem;
+			padding-bottom: 0.25rem;
+		}
+
+		.sidebar-filter {
+			padding: 0.625rem 1rem;
+			font-size: 0.9rem;
+		}
+
+		.resources-grid {
 			grid-template-columns: 1fr;
+			gap: 1rem;
+		}
+
+		.resources-section {
+			padding: 2rem 0;
 		}
 	}
 </style>
