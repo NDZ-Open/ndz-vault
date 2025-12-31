@@ -3,17 +3,25 @@ import type { Handle } from '@sveltejs/kit';
 const FLARUM_URL = import.meta.env.FLARUM_URL || 'https://ndz.ng';
 
 export const handle: Handle = async ({ event, resolve }) => {
-	// Check for Flarum session cookie
+	// Step 1: Confirm hook is running
+	console.log('🔵 HOOK RUNNING', event.url.pathname);
+	
+	// Step 2: Check if cookie is present
+	const allCookies = event.cookies.getAll();
+	console.log('🔵 COOKIES', allCookies.map(c => ({ name: c.name, value: c.value.substring(0, 20) + '...' })));
+	
 	const sessionCookie = event.cookies.get('flarum_session');
+	console.log('🔵 SESSION COOKIE PRESENT:', !!sessionCookie);
 	
 	// Initialize user as null
 	event.locals.user = null;
 	
-	// If we have a session cookie, validate it with Flarum
+	// Step 3: Validate with Flarum API
 	if (sessionCookie) {
 		try {
-			// Forward ALL cookies from the browser request to Flarum
 			const cookieHeader = event.request.headers.get('cookie') || '';
+			console.log('🔵 COOKIE HEADER LENGTH:', cookieHeader.length);
+			console.log('🔵 CALLING FLARUM API:', `${FLARUM_URL}/api`);
 			
 			const response = await event.fetch(`${FLARUM_URL}/api`, {
 				headers: {
@@ -22,11 +30,12 @@ export const handle: Handle = async ({ event, resolve }) => {
 				}
 			});
 
+			console.log('🔵 FLARUM RESPONSE STATUS:', response.status);
+
 			if (response.ok) {
 				const data = await response.json();
+				console.log('🔵 FLARUM RESPONSE DATA:', JSON.stringify(data, null, 2).substring(0, 500));
 				
-				// Only set user if we have valid authenticated user data
-				// Anonymous/guest users have ID 0 or 1, real users have ID > 1
 				const userData = data.data;
 				
 				if (
@@ -47,12 +56,22 @@ export const handle: Handle = async ({ event, resolve }) => {
 						email: userData.attributes.email,
 						avatarUrl: userData.attributes.avatarUrl
 					};
+					console.log('🔵 ✅ USER AUTHENTICATED:', event.locals.user.username);
+				} else {
+					console.log('🔵 ❌ USER DATA FAILED VALIDATION. ID:', userData?.id, 'Username:', userData?.attributes?.username);
 				}
+			} else {
+				const text = await response.text();
+				console.log('🔵 ❌ FLARUM API ERROR:', response.status, text.substring(0, 200));
 			}
-		} catch (err) {
-			// Fail silently - user stays null
+		} catch (err: any) {
+			console.error('🔵 ❌ EXCEPTION:', err.message);
 		}
+	} else {
+		console.log('🔵 ❌ NO SESSION COOKIE');
 	}
+	
+	console.log('🔵 LOCALS USER:', event.locals.user ? `✅ ${event.locals.user.username}` : '❌ null');
 	
 	return resolve(event);
 };
