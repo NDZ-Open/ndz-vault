@@ -23,6 +23,7 @@ You can add a "Go to NDZ Vault" link to Flarum in several ways:
 ### Option 2: Add to Header (via extension or custom HTML)
 
 If you have access to Flarum's header, you can add:
+
 ```html
 <a href="https://dev.ndz.ng" class="Button Button--link">Go to NDZ Vault</a>
 ```
@@ -40,6 +41,7 @@ Add it to the Flarum footer via Admin → Appearance → Footer.
 Make sure Flarum cookies are set with domain `.ndz.ng` so both `ndz.ng` and `dev.ndz.ng` can access them.
 
 In Flarum's `config.php`:
+
 ```php
 'cookie' => [
     'domain' => '.ndz.ng',
@@ -53,4 +55,3 @@ In Flarum's `config.php`:
 3. Log in on Flarum
 4. Click "Go to NDZ Vault" link
 5. You should be redirected to vault and see the download button
-
