@@ -4,16 +4,19 @@
 	import type { LayoutData } from './$types';
 	
 	export let data: LayoutData;
+	
+	function logout() {
+		document.cookie = 'auth_token=; path=/; max-age=0';
+		window.location.reload();
+	}
 </script>
 
 {#if data.user}
 	<header class="user-header">
 		<div class="container">
 			<div class="user-info">
-				<span>Logged in as {data.user.displayName}</span>
-				<form method="POST" action="/auth/logout">
-					<button type="submit" class="logout-button">Logout</button>
-				</form>
+				<span>Logged in as {data.user.username}</span>
+				<button on:click={logout} class="logout-button">Logout</button>
 			</div>
 		</div>
 	</header>

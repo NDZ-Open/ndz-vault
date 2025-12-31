@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import LoginButton from '$lib/components/LoginButton.svelte';
+	import LoginModal from '$lib/components/LoginModal.svelte';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	
@@ -11,11 +11,12 @@
 	$: user = data.user;
 	$: isAuthenticated = data.isAuthenticated || false;
 	
+	let showLogin = false;
+	
 	function handleDownload() {
 		if (!isAuthenticated || !user) {
-			// Redirect to Flarum login
-			const FLARUM_URL = 'https://ndz.ng';
-			window.location.href = `${FLARUM_URL}/login`;
+			// Show login modal
+			showLogin = true;
 		} else {
 			// User is authenticated - handle download
 			// TODO: Implement actual download logic
@@ -134,7 +135,9 @@
 						{:else}
 							<h2 class="form-title">Get Your Resource</h2>
 							<p class="form-subtitle">Unlock Resource by Signing up or login</p>
-							<LoginButton returnPath="/resource/{resource.id}" />
+							<button class="login-button" on:click={() => showLogin = true}>
+								Access Resource
+							</button>
 							<p class="login-note">
 								Don't have an account? 
 								<a href="https://ndz.ng/register" target="_blank" rel="noopener noreferrer">Sign up on NDZ</a>
@@ -434,6 +437,25 @@
 		font-weight: 500;
 	}
 
+	.login-button {
+		width: 100%;
+		padding: 1.5rem 2.5rem;
+		background: linear-gradient(135deg, var(--button-color) 0%, rgba(0, 235, 152, 0.9) 100%);
+		color: var(--button-text);
+		font-weight: 600;
+		font-size: 1.1rem;
+		border-radius: 12px;
+		border: none;
+		cursor: pointer;
+		transition: all 0.3s ease;
+		margin-bottom: 1rem;
+	}
+	
+	.login-button:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 8px 24px rgba(0, 235, 152, 0.4);
+	}
+	
 	.download-button {
 		width: 100%;
 		padding: 1.5rem 2.5rem;
@@ -579,4 +601,8 @@
 		}
 	}
 </style>
+
+{#if showLogin}
+	<LoginModal on:close={() => showLogin = false} />
+{/if}
 
