@@ -106,29 +106,14 @@
 				<!-- Right: Download Section -->
 				<div class="form-section">
 					<div class="form-card">
-						<h2 class="form-title">Download Resource</h2>
-						<p class="form-subtitle">You're logged in as {displayName}</p>
-						
-						<div class="resource-download">
-							<div class="download-icon-wrapper">
-								<div class="download-icon">{resource.icon || '📄'}</div>
-							</div>
-							<h3>{resource.title}</h3>
-							<div class="download-tags">
-								{#each resource.tags as tag}
-									<span class="tag">{tag}</span>
-								{/each}
-							</div>
-							
-							<button class="download-button">
-								<span>Download Resource</span>
-								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-									<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-									<polyline points="7 10 12 15 17 10"></polyline>
-									<line x1="12" y1="15" x2="12" y2="3"></line>
-								</svg>
-							</button>
-						</div>
+						<button class="download-button">
+							<span>Download Resource</span>
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+								<polyline points="7 10 12 15 17 10"></polyline>
+								<line x1="12" y1="15" x2="12" y2="3"></line>
+							</svg>
+						</button>
 					</div>
 				</div>
 			</section>
@@ -344,6 +329,9 @@
 		border: 1px solid rgba(255, 255, 255, 0.1);
 		text-align: center;
 		width: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 
 	.form-title {
@@ -425,11 +413,11 @@
 
 	.download-button {
 		width: 100%;
-		padding: 1.25rem 2rem;
+		padding: 1.5rem 2.5rem;
 		background: linear-gradient(135deg, var(--button-color) 0%, rgba(0, 235, 152, 0.9) 100%);
 		color: var(--button-text);
 		font-weight: 600;
-		font-size: 1.05rem;
+		font-size: 1.1rem;
 		border-radius: 12px;
 		transition: all 0.3s ease;
 		display: flex;
@@ -439,7 +427,7 @@
 		box-shadow: 0 4px 15px rgba(0, 235, 152, 0.2);
 		border: none;
 		cursor: pointer;
-		margin-top: 1.5rem;
+		margin: 0;
 	}
 
 	.download-button svg {
