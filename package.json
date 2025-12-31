@@ -22,6 +22,7 @@
   "type": "module",
   "dependencies": {
     "@types/jsonwebtoken": "^9.0.10",
-    "jsonwebtoken": "^9.0.3"
+    "jsonwebtoken": "^9.0.3",
+    "mysql2": "^3.16.0"
   }
 }
