@@ -26,8 +26,28 @@ export const handle: Handle = async ({ event, resolve }) => {
 				const data = await response.json();
 				const userData = data.data;
 				
-				// Check if we got a real authenticated user (not anonymous/guest)
-				if (userData?.id && userData.id > 1 && userData.attributes?.username) {
+				// STRICT validation: Only authenticate real users, not guests
+				// Real authenticated users have:
+				// - ID > 1 (guests are usually ID 1 or 0)
+				// - Valid username (not empty, not "Guest")
+				// - Email address (guests don't have emails)
+				const username = userData?.attributes?.username?.trim() || '';
+				const email = userData?.attributes?.email?.trim() || '';
+				const userId = userData?.id;
+				
+				// Only authenticate if ALL conditions are met
+				const isAuthenticated = (
+					userId && 
+					typeof userId === 'number' &&
+					userId > 1 && // Exclude ID 1 (usually admin/guest)
+					username !== '' &&
+					username.toLowerCase() !== 'guest' &&
+					username.toLowerCase() !== 'anonymous' &&
+					email !== '' && // Real users have emails, guests don't
+					email.includes('@') // Basic email validation
+				);
+				
+				if (isAuthenticated) {
 					event.locals.user = {
 						authenticated: true
 					};
