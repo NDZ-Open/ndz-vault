@@ -1,8 +1,20 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
+	
+	export let returnPath: string | undefined = undefined;
+	
 	const FLARUM_URL = 'https://ndz.ng';
 	
-	// Just redirect to Flarum login - user will manually come back via "Go to NDZ Vault" link
-	const loginUrl = `${FLARUM_URL}/login`;
+	// Get the return URL - use returnPath prop if provided, otherwise use current page
+	let returnUrl = returnPath || '/';
+	if (browser && !returnPath) {
+		returnUrl = window.location.pathname + window.location.search;
+	}
+	
+	// Redirect to Flarum login with return URL
+	// After login, Flarum's SSO extension will redirect to dev.ndz.ng/auth/sso/login
+	// which will generate a JWT and complete the SSO flow
+	const loginUrl = `${FLARUM_URL}/login?return=${encodeURIComponent(`https://dev.ndz.ng${returnUrl}`)}`;
 </script>
 
 <a 
