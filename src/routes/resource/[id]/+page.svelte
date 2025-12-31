@@ -9,7 +9,7 @@
 	$: resource = data.resource;
 	$: category = data.category;
 	$: user = data.user;
-	$: isAuthenticated = !!user && !!user.id && user.id > 0;
+	$: isAuthenticated = !!user && user.authenticated === true;
 	
 	function handleDownload() {
 		if (!isAuthenticated || !user) {
