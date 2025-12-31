@@ -27,13 +27,14 @@ export const load: PageServerLoad = async ({ url, cookies, fetch, request }) => 
 
 	// Verify the session is valid by checking Flarum API
 	try {
-		const cookieHeader = `flarum_session=${sessionCookie}${rememberCookie ? `; flarum_remember=${rememberCookie}` : ''}`;
+		// Forward ALL cookies from the browser request to Flarum
+		const cookieHeader = request.headers.get('cookie') || '';
+		
 		const response = await fetch(`${FLARUM_URL}/api`, {
 			headers: {
 				'Cookie': cookieHeader,
 				'Accept': 'application/json'
-			},
-			credentials: 'include'
+			}
 		});
 
 		if (!response.ok) {

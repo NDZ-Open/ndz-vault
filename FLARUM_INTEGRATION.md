@@ -17,14 +17,14 @@ You can add a "Go to NDZ Vault" link to Flarum in several ways:
 1. Go to Flarum Admin → Appearance → Navigation
 2. Add a new navigation item:
    - **Title**: "NDZ Vault" or "Go to NDZ Vault"
-   - **URL**: `https://vault.ndz.ng`
+   - **URL**: `https://dev.ndz.ng`
    - **Icon**: (optional)
 
 ### Option 2: Add to Header (via extension or custom HTML)
 
 If you have access to Flarum's header, you can add:
 ```html
-<a href="https://vault.ndz.ng" class="Button Button--link">Go to NDZ Vault</a>
+<a href="https://dev.ndz.ng" class="Button Button--link">Go to NDZ Vault</a>
 ```
 
 ### Option 3: Add to User Menu
@@ -48,7 +48,7 @@ In Flarum's `config.php`:
 
 ## Testing
 
-1. Visit vault.ndz.ng/resource/[any-resource]
+1. Visit dev.ndz.ng/resource/[any-resource]
 2. Click "Continue with NDZ Account"
 3. Log in on Flarum
 4. Click "Go to NDZ Vault" link
