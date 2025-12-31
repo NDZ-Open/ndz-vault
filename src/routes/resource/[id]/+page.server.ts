@@ -5,21 +5,14 @@ export const load: PageServerLoad = async ({ params, cookies, fetch, request }) 
 	const resource = getResourceById(params.id || '');
 	const category = resource ? categories.find(c => c.id === resource.category) : null;
 	
-	// Check if user is logged in by checking session cookie and verifying with Flarum API
+	// Simple auth check: cookie exists AND Flarum API returns valid user
 	let user = null;
 	const sessionCookie = cookies.get('flarum_session');
 	
 	if (sessionCookie) {
 		try {
 			const FLARUM_URL = import.meta.env.FLARUM_URL || 'https://ndz.ng';
-			
-			// Forward ALL cookies from the browser request to Flarum
 			const cookieHeader = request.headers.get('cookie') || '';
-			
-			// Log for debugging (remove in production)
-			console.log('[AUTH] Session cookie from cookies.get():', sessionCookie.substring(0, 20) + '...');
-			console.log('[AUTH] Full cookie header from request:', cookieHeader);
-			console.log('[AUTH] Calling Flarum API:', `${FLARUM_URL}/api`);
 			
 			const response = await fetch(`${FLARUM_URL}/api`, {
 				headers: {
@@ -28,55 +21,24 @@ export const load: PageServerLoad = async ({ params, cookies, fetch, request }) 
 				}
 			});
 
-			console.log('[AUTH] Response status:', response.status, response.statusText);
-			console.log('[AUTH] Response headers:', Object.fromEntries(response.headers.entries()));
-
 			if (response.ok) {
 				const data = await response.json();
-				console.log('[AUTH] Full response:', JSON.stringify(data, null, 2).substring(0, 500));
 				
-				// Flarum API might return data in different formats
-				// Check for user data in various possible locations
-				let userData = null;
-				
-				if (data.data && data.data.id) {
-					userData = data.data;
-				} else if (data.users && data.users[0]) {
-					userData = data.users[0];
-				} else if (data.user) {
-					userData = data.user;
-				}
-				
-				// STRICT check - only set user if we have valid user data with username
-				if (userData && userData.id && userData.attributes && userData.attributes.username) {
+				// Flarum returns user in data.data when authenticated
+				// Anonymous users have ID 0 or negative, authenticated users have ID > 0
+				if (data.data && data.data.id && data.data.id > 0 && data.data.attributes && data.data.attributes.username) {
 					user = {
-						id: userData.id,
-						username: userData.attributes.username,
-						displayName: userData.attributes.displayName || userData.attributes.username,
-						email: userData.attributes.email,
-						avatarUrl: userData.attributes.avatarUrl
+						id: data.data.id,
+						username: data.data.attributes.username,
+						displayName: data.data.attributes.displayName || data.data.attributes.username,
+						email: data.data.attributes.email,
+						avatarUrl: data.data.attributes.avatarUrl
 					};
-					console.log('[AUTH] ✅ User authenticated:', user.username);
-				} else {
-					// Explicitly set user to null if no valid data
-					user = null;
-					console.log('[AUTH] ❌ No valid user data found. Response structure:', JSON.stringify(data, null, 2).substring(0, 500));
 				}
-			} else {
-				// Explicitly set user to null on error
-				user = null;
-				const text = await response.text();
-				console.log('[AUTH] ❌ Flarum API error:', response.status, text.substring(0, 300));
 			}
-		} catch (err: any) {
-			// Explicitly set user to null on exception
-			user = null;
-			console.error('[AUTH] ❌ Exception:', err.message, err.stack);
+		} catch (err) {
+			// Fail silently - user stays null
 		}
-	} else {
-		// Explicitly set user to null if no cookie
-		user = null;
-		console.log('[AUTH] ❌ No session cookie found');
 	}
 	
 	return {
@@ -85,4 +47,3 @@ export const load: PageServerLoad = async ({ params, cookies, fetch, request }) 
 		user
 	};
 };
-

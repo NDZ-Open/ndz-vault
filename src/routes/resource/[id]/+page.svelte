@@ -9,11 +9,7 @@
 	$: resource = data.resource;
 	$: category = data.category;
 	$: user = data.user;
-	$: isAuthenticated = !!user;
-	
-	// Only use server-side authentication - no client-side fallback
-	// Client-side checks can be bypassed, so we only trust server-side
-	$: isAuthenticated = !!user;
+	$: isAuthenticated = !!user && !!user.id && user.id > 0;
 	
 	function handleDownload() {
 		if (!isAuthenticated || !user) {
