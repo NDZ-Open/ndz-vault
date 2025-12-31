@@ -37,7 +37,7 @@ Add it to the Flarum footer via Admin → Appearance → Footer.
 
 ## Cookie Configuration
 
-Make sure Flarum cookies are set with domain `.ndz.ng` so both `ndz.ng` and `vault.ndz.ng` can access them.
+Make sure Flarum cookies are set with domain `.ndz.ng` so both `ndz.ng` and `dev.ndz.ng` can access them.
 
 In Flarum's `config.php`:
 ```php
