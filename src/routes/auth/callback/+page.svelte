@@ -2,17 +2,24 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	
-	// Client-side redirect fallback in case server-side redirect doesn't work
+	let returnTo = '/';
+	let showManualLink = false;
+	
 	onMount(() => {
-		const returnTo = $page.url.searchParams.get('return') || $page.url.searchParams.get('redirect') || '/';
+		returnTo = $page.url.searchParams.get('return') || $page.url.searchParams.get('redirect') || '/';
 		
-		// Wait a moment for server-side redirect, then do client-side redirect
+		// Try server-side redirect first
+		// If that doesn't work, show manual link after 2 seconds
 		const timer = setTimeout(() => {
-			window.location.href = returnTo;
-		}, 1000);
+			showManualLink = true;
+		}, 2000);
 		
 		return () => clearTimeout(timer);
 	});
+	
+	function handleContinue() {
+		window.location.href = returnTo;
+	}
 </script>
 
 <div class="loading-container">
@@ -20,6 +27,12 @@
 		<div class="spinner"></div>
 		<p>Logging you in...</p>
 		<p class="redirect-note">Redirecting you back...</p>
+		
+		{#if showManualLink}
+			<button class="continue-button" on:click={handleContinue}>
+				Click here to continue
+			</button>
+		{/if}
 	</div>
 </div>
 
@@ -61,6 +74,24 @@
 	.redirect-note {
 		font-size: 0.85rem;
 		opacity: 0.7;
+	}
+	
+	.continue-button {
+		margin-top: 2rem;
+		padding: 1rem 2rem;
+		background: var(--button-color);
+		color: var(--button-text);
+		border: none;
+		border-radius: 8px;
+		font-size: 1rem;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 0.2s;
+	}
+	
+	.continue-button:hover {
+		transform: translateY(-1px);
+		box-shadow: 0 4px 12px rgba(0, 235, 152, 0.3);
 	}
 </style>
 

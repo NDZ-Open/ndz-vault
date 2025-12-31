@@ -10,7 +10,7 @@ function getVaultUrl(request: Request): string {
 
 export const load: PageServerLoad = async ({ url, cookies, fetch, request }) => {
 	// Get environment variables at runtime (not inlined at build time)
-	const FLARUM_URL = env.FLARUM_URL || 'https://ndz.ng';
+	const FORUM_URL = env.FLARUM_URL || 'https://ndz.ng';
 	
 	// Get current vault URL dynamically
 	const VAULT_URL = getVaultUrl(request);
@@ -24,7 +24,8 @@ export const load: PageServerLoad = async ({ url, cookies, fetch, request }) => 
 	
 	// If no session cookie, redirect to Flarum login
 	if (!sessionCookie) {
-		throw redirect(302, `${FLARUM_URL}/login?return=${encodeURIComponent(returnUrl)}`);
+		const callbackUrl = `${VAULT_URL}/auth/callback?return=${encodeURIComponent(returnTo)}`;
+		throw redirect(302, `${FORUM_URL}/login?return=${encodeURIComponent(callbackUrl)}`);
 	}
 
 	// Verify the session is valid by checking Flarum API
@@ -32,7 +33,7 @@ export const load: PageServerLoad = async ({ url, cookies, fetch, request }) => 
 		// Forward ALL cookies from the browser request to Flarum
 		const cookieHeader = request.headers.get('cookie') || '';
 		
-		const response = await fetch(`${FLARUM_URL}/api`, {
+		const response = await fetch(`${FORUM_URL}/api`, {
 			headers: {
 				'Cookie': cookieHeader,
 				'Accept': 'application/json'
@@ -41,7 +42,8 @@ export const load: PageServerLoad = async ({ url, cookies, fetch, request }) => 
 
 		if (!response.ok) {
 			// Invalid session, redirect to login
-			throw redirect(302, `${FLARUM_URL}/login?return=${encodeURIComponent(returnUrl)}`);
+			const callbackUrl = `${VAULT_URL}/auth/callback?return=${encodeURIComponent(returnTo)}`;
+			throw redirect(302, `${FORUM_URL}/login?return=${encodeURIComponent(callbackUrl)}`);
 		}
 		
 		// Session is valid - redirect to the requested page
@@ -53,6 +55,7 @@ export const load: PageServerLoad = async ({ url, cookies, fetch, request }) => 
 		}
 		
 		// If verification fails, redirect to login
-		throw redirect(302, `${FLARUM_URL}/login?return=${encodeURIComponent(returnUrl)}`);
+		const callbackUrl = `${VAULT_URL}/auth/callback?return=${encodeURIComponent(returnTo)}`;
+		throw redirect(302, `${FORUM_URL}/login?return=${encodeURIComponent(callbackUrl)}`);
 	}
 };

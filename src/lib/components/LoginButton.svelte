@@ -18,9 +18,11 @@
 		vaultUrl = window.location.origin;
 	}
 	
-	// Redirect to Flarum login with return URL back to vault
-	// FoF Direct Links extension will handle the redirect after login
-	const loginUrl = `${FORUM_URL}/login?return=${encodeURIComponent(`${vaultUrl}${returnUrl}`)}`;
+	// Redirect to Flarum login with return URL pointing to our callback page
+	// The callback page will validate the cookie and redirect to the actual resource
+	// This works around Flarum's security restrictions on external redirects
+	const callbackUrl = `${vaultUrl}/auth/callback?return=${encodeURIComponent(returnUrl)}`;
+	const loginUrl = `${FORUM_URL}/login?return=${encodeURIComponent(callbackUrl)}`;
 </script>
 
 <a 
