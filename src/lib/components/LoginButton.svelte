@@ -1,12 +1,16 @@
 <script lang="ts">
-	// Flarum forum URL
-	const FORUM_URL = 'https://ndz.ng';
+	import { browser } from '$app/environment';
 	
-	// Simple: Just redirect to Flarum login
-	// After login, user comes back to dev.ndz.ng
-	// hooks.server.ts automatically checks the cookie on every request
-	// If cookie is valid → resource unlocks. If not → stays locked.
-	const loginUrl = `${FORUM_URL}/login`;
+	export let returnPath: string | undefined = undefined;
+	
+	// Get the return URL - use returnPath prop if provided, otherwise use current page
+	let returnUrl = returnPath || '/';
+	if (browser && !returnPath) {
+		returnUrl = window.location.pathname + window.location.search;
+	}
+	
+	// Redirect to OAuth login endpoint
+	const loginUrl = `/auth/login?return=${encodeURIComponent(returnUrl)}`;
 </script>
 
 <a 

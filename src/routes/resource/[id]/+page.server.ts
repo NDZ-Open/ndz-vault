@@ -1,21 +1,19 @@
 import type { PageServerLoad } from './$types';
 import { getResourceById, categories } from '$lib/data/resources';
+import { getUser } from '$lib/server/auth';
 
-export const load: PageServerLoad = async ({ params, locals, url }) => {
+export const load: PageServerLoad = async ({ params, cookies }) => {
 	const resource = getResourceById(params.id || '');
 	const category = resource ? categories.find(c => c.id === resource.category) : null;
 	
-	// Simple check: if cookie exists, user is authenticated
-	const isAuthenticated = !!locals.user;
-	
-	// Check if we just came from Flarum (has return parameter)
-	// This helps prevent redirect loops
-	const fromFlarum = url.searchParams.has('return') || url.searchParams.has('token');
+	// Check for OAuth access token
+	const token = cookies.get('access_token');
+	const user = token ? await getUser(token) : null;
 	
 	return {
 		resource,
 		category,
-		user: isAuthenticated ? { authenticated: true } : null,
-		fromFlarum
+		user: user ? { authenticated: true, ...user } : null,
+		isAuthenticated: !!user
 	};
 };
