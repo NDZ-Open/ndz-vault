@@ -49,11 +49,22 @@ export const GET: RequestHandler = async ({ url, cookies, fetch, request }) => {
 	}
 
 	// If we don't have user data, user needs to log in on Flarum first
+	// BUT: If Flarum's SSO extension is calling us, we shouldn't redirect back to Flarum
+	// as that creates an infinite loop. Instead, redirect to Flarum login without the SSO return URL
 	if (!userData || !userData.id) {
-		// Redirect to Flarum login, then back here
-		const vaultUrl = new URL(request.url).origin;
-		const ssoReturnUrl = `${vaultUrl}/auth/sso/login?return=${encodeURIComponent(returnUrl)}`;
-		throw redirect(302, `${FLARUM_URL}/login?return=${encodeURIComponent(ssoReturnUrl)}`);
+		// Check if this is a direct SSO call from Flarum (has return param pointing to Flarum)
+		const isFlarumSSOCall = returnUrl.includes(FLARUM_URL);
+		
+		if (isFlarumSSOCall) {
+			// Flarum SSO extension called us - redirect to Flarum login directly
+			// Don't include our SSO endpoint in the return URL to prevent loops
+			throw redirect(302, `${FLARUM_URL}/login`);
+		} else {
+			// User is trying to access a resource - redirect to Flarum login with return URL
+			const vaultUrl = new URL(request.url).origin;
+			const ssoReturnUrl = `${vaultUrl}/auth/sso/login?return=${encodeURIComponent(returnUrl)}`;
+			throw redirect(302, `${FLARUM_URL}/login?return=${encodeURIComponent(ssoReturnUrl)}`);
+		}
 	}
 
 	// Validate user is actually authenticated (not a guest)
@@ -62,10 +73,19 @@ export const GET: RequestHandler = async ({ url, cookies, fetch, request }) => {
 	const userId = userData.id;
 
 	if (!userId || userId <= 1 || !username || !email || !email.includes('@')) {
-		// Not a valid authenticated user - redirect to login
-		const vaultUrl = new URL(request.url).origin;
-		const ssoReturnUrl = `${vaultUrl}/auth/sso/login?return=${encodeURIComponent(returnUrl)}`;
-		throw redirect(302, `${FLARUM_URL}/login?return=${encodeURIComponent(ssoReturnUrl)}`);
+		// Not a valid authenticated user
+		// Check if this is a Flarum SSO call to prevent loops
+		const isFlarumSSOCall = returnUrl.includes(FLARUM_URL);
+		
+		if (isFlarumSSOCall) {
+			// Flarum SSO extension called us - redirect to Flarum login directly
+			throw redirect(302, `${FLARUM_URL}/login`);
+		} else {
+			// User trying to access resource - redirect with return URL
+			const vaultUrl = new URL(request.url).origin;
+			const ssoReturnUrl = `${vaultUrl}/auth/sso/login?return=${encodeURIComponent(returnUrl)}`;
+			throw redirect(302, `${FLARUM_URL}/login?return=${encodeURIComponent(ssoReturnUrl)}`);
+		}
 	}
 
 	// Generate JWT token with user information for Flarum SSO

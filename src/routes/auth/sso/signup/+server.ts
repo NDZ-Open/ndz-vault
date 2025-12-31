@@ -44,10 +44,19 @@ export const GET: RequestHandler = async ({ url, cookies, fetch, request }) => {
 	}
 
 	// If we don't have user data, user needs to sign up on Flarum first
+	// Check if this is a Flarum SSO call to prevent loops
+	const isFlarumSSOCall = returnUrl.includes(FLARUM_URL);
+	
 	if (!userData || !userData.id) {
-		const vaultUrl = new URL(request.url).origin;
-		const ssoReturnUrl = `${vaultUrl}/auth/sso/signup?return=${encodeURIComponent(returnUrl)}`;
-		throw redirect(302, `${FLARUM_URL}/register?return=${encodeURIComponent(ssoReturnUrl)}`);
+		if (isFlarumSSOCall) {
+			// Flarum SSO extension called us - redirect to Flarum register directly
+			throw redirect(302, `${FLARUM_URL}/register`);
+		} else {
+			// User trying to access resource - redirect with return URL
+			const vaultUrl = new URL(request.url).origin;
+			const ssoReturnUrl = `${vaultUrl}/auth/sso/signup?return=${encodeURIComponent(returnUrl)}`;
+			throw redirect(302, `${FLARUM_URL}/register?return=${encodeURIComponent(ssoReturnUrl)}`);
+		}
 	}
 
 	// Validate user is actually authenticated (not a guest)
@@ -56,9 +65,16 @@ export const GET: RequestHandler = async ({ url, cookies, fetch, request }) => {
 	const userId = userData.id;
 
 	if (!userId || userId <= 1 || !username || !email || !email.includes('@')) {
-		const vaultUrl = new URL(request.url).origin;
-		const ssoReturnUrl = `${vaultUrl}/auth/sso/signup?return=${encodeURIComponent(returnUrl)}`;
-		throw redirect(302, `${FLARUM_URL}/register?return=${encodeURIComponent(ssoReturnUrl)}`);
+		// Not a valid authenticated user
+		if (isFlarumSSOCall) {
+			// Flarum SSO extension called us - redirect to Flarum register directly
+			throw redirect(302, `${FLARUM_URL}/register`);
+		} else {
+			// User trying to access resource - redirect with return URL
+			const vaultUrl = new URL(request.url).origin;
+			const ssoReturnUrl = `${vaultUrl}/auth/sso/signup?return=${encodeURIComponent(returnUrl)}`;
+			throw redirect(302, `${FLARUM_URL}/register?return=${encodeURIComponent(ssoReturnUrl)}`);
+		}
 	}
 
 	// Generate JWT token with user information for Flarum SSO
