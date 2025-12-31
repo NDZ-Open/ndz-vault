@@ -1,55 +1,30 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	
 	export let user: { id: number; username: string; displayName?: string; email: string; avatarUrl?: string | null } | null;
-	
-	let showDropdown = false;
-	let dropdownElement: HTMLElement;
 	
 	function logout() {
 		document.cookie = 'auth_token=; path=/; max-age=0';
 		window.location.reload();
 	}
-	
-	function toggleDropdown() {
-		showDropdown = !showDropdown;
-	}
-	
-	function handleClickOutside(event: MouseEvent) {
-		const target = event.target as HTMLElement;
-		if (dropdownElement && !dropdownElement.contains(target)) {
-			showDropdown = false;
-		}
-	}
-	
-	onMount(() => {
-		document.addEventListener('click', handleClickOutside);
-		return () => {
-			document.removeEventListener('click', handleClickOutside);
-		};
-	});
 </script>
 
 {#if user}
-	<div class="user-dropdown" bind:this={dropdownElement}>
-		<button on:click={toggleDropdown} class="user-button">
+	<div class="user-dropdown">
+		<button class="user-button">
 			<span class="user-name">{user.username}</span>
 			<svg class="dropdown-icon" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2">
 				<path d="M2 4l4 4 4-4"/>
 			</svg>
 		</button>
-		{#if showDropdown}
-			<div class="dropdown-menu">
-				<div class="dropdown-item user-info-item">
-					<span class="dropdown-label">Logged in as</span>
-					<span class="dropdown-value">{user.username}</span>
-				</div>
-				<div class="dropdown-divider"></div>
-				<button on:click={logout} class="dropdown-item logout-item">
-					Logout
-				</button>
+		<div class="dropdown-menu">
+			<div class="dropdown-item user-info-item">
+				<span class="dropdown-label">Logged in as</span>
+				<span class="dropdown-value">{user.username}</span>
 			</div>
-		{/if}
+			<div class="dropdown-divider"></div>
+			<button on:click={logout} class="dropdown-item logout-item">
+				Logout
+			</button>
+		</div>
 	</div>
 {/if}
 
@@ -63,15 +38,18 @@
 		align-items: center;
 		gap: 0.5rem;
 		background: transparent;
-		border: none;
+		border: 1px solid rgba(255, 255, 255, 0.2);
 		color: var(--text-secondary);
-		padding: 0;
+		padding: 0.5rem 1rem;
+		border-radius: 4px;
 		cursor: pointer;
 		font-size: 0.9rem;
-		transition: color 0.2s;
+		transition: all 0.2s;
 	}
 	
 	.user-button:hover {
+		background: rgba(255, 255, 255, 0.05);
+		border-color: rgba(255, 255, 255, 0.3);
 		color: var(--text-primary);
 	}
 	
@@ -83,8 +61,7 @@
 		transition: transform 0.2s;
 	}
 	
-	.user-button:hover .dropdown-icon,
-	.user-dropdown:has(.dropdown-menu) .dropdown-icon {
+	.user-button:hover .dropdown-icon {
 		transform: rotate(180deg);
 	}
 	
@@ -99,6 +76,18 @@
 		min-width: 200px;
 		overflow: hidden;
 		z-index: 1000;
+		opacity: 0;
+		visibility: hidden;
+		transform: translateY(-10px);
+		transition: opacity 0.2s, visibility 0.2s, transform 0.2s;
+		pointer-events: none;
+	}
+	
+	.user-dropdown:hover .dropdown-menu {
+		opacity: 1;
+		visibility: visible;
+		transform: translateY(0);
+		pointer-events: auto;
 	}
 	
 	.dropdown-item {
