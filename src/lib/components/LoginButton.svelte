@@ -5,10 +5,12 @@
 	export let returnPath: string | null = null;
 	
 	const FLARUM_URL = 'https://ndz.ng';
+	const FLARUM_DESTINATION_PAGE = 'https://ndz.ng/p/5-ndz-vault';
 	
 	// Get current host (works for both localhost and production)
 	$: currentHost = browser ? window.location.origin : '';
-	$: loginUrl = `${FLARUM_URL}/login`;
+	// Redirect to Flarum login, which will show the destination page after login
+	$: loginUrl = `${FLARUM_URL}/login?return=${encodeURIComponent(FLARUM_DESTINATION_PAGE)}`;
 </script>
 
 <a 

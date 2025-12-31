@@ -1,14 +1,27 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import LoginButton from '$lib/components/LoginButton.svelte';
+	import { goto } from '$app/navigation';
 	
 	export let data: PageData;
 	
 	$: resource = data.resource;
 	$: category = data.category;
 	$: user = data.user;
+	$: isAuthenticated = !!user;
 	
-	// User is guaranteed to be authenticated at this point (server enforces it)
-	$: displayName = user?.displayName || user?.username || 'User';
+	function handleDownload() {
+		if (!isAuthenticated) {
+			// Redirect to Flarum login, which will show the destination page after login
+			const FLARUM_URL = 'https://ndz.ng';
+			const FLARUM_DESTINATION_PAGE = 'https://ndz.ng/p/5-ndz-vault';
+			window.location.href = `${FLARUM_URL}/login?return=${encodeURIComponent(FLARUM_DESTINATION_PAGE)}`;
+		} else {
+			// User is authenticated - handle download
+			// TODO: Implement actual download logic
+			console.log('Downloading resource:', resource?.id);
+		}
+	}
 	
 	const testimonials = [
 		{
@@ -109,14 +122,24 @@
 				<!-- Right: Download Section -->
 				<div class="form-section">
 					<div class="form-card">
-						<button class="download-button">
-							<span>Download Resource</span>
-							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-								<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-								<polyline points="7 10 12 15 17 10"></polyline>
-								<line x1="12" y1="15" x2="12" y2="3"></line>
-							</svg>
-						</button>
+						{#if isAuthenticated}
+							<button class="download-button" on:click={handleDownload}>
+								<span>Download Resource</span>
+								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+									<polyline points="7 10 12 15 17 10"></polyline>
+									<line x1="12" y1="15" x2="12" y2="3"></line>
+								</svg>
+							</button>
+						{:else}
+							<h2 class="form-title">Get Your Resource</h2>
+							<p class="form-subtitle">Unlock Resource by Signing up or login</p>
+							<LoginButton returnPath="/resource/{resource.id}" />
+							<p class="login-note">
+								Don't have an account? 
+								<a href="https://ndz.ng/register" target="_blank" rel="noopener noreferrer">Sign up on NDZ</a>
+							</p>
+						{/if}
 					</div>
 				</div>
 			</section>
@@ -332,9 +355,6 @@
 		border: 1px solid rgba(255, 255, 255, 0.1);
 		text-align: center;
 		width: 100%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
 	}
 
 	.form-title {
