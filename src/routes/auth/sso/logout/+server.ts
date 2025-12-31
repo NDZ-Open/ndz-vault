@@ -1,9 +1,11 @@
 import { redirect } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-
-const FLARUM_URL = import.meta.env.FLARUM_URL || 'https://ndz.ng';
+import { env } from '$env/dynamic/private';
 
 export const GET: RequestHandler = async ({ url, cookies }) => {
+	// Get environment variables at runtime (not inlined at build time)
+	const FLARUM_URL = env.FLARUM_URL || 'https://ndz.ng';
+	
 	// Get return URL from Flarum (where to redirect after logout)
 	const returnUrl = url.searchParams.get('return') || `${FLARUM_URL}/`;
 	

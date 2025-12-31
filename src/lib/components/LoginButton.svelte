@@ -11,9 +11,9 @@
 		returnUrl = window.location.pathname + window.location.search;
 	}
 	
-	// Redirect to Flarum login with return URL
-	// After login, Flarum's SSO extension will redirect to dev.ndz.ng/auth/sso/login
-	// which will generate a JWT and complete the SSO flow
+	// Simple flow: Redirect to Flarum login with return URL
+	// After login, Flarum sets cookies with domain .ndz.ng and redirects back
+	// hooks.server.ts automatically detects and validates the cookie
 	const loginUrl = `${FLARUM_URL}/login?return=${encodeURIComponent(`https://dev.ndz.ng${returnUrl}`)}`;
 </script>
 

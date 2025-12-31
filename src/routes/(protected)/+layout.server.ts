@@ -1,7 +1,6 @@
 import { redirect, error } from '@sveltejs/kit';
 import type { LayoutServerLoad } from './$types';
-
-const FLARUM_URL = import.meta.env.FLARUM_URL || 'https://ndz.ng';
+import { env } from '$env/dynamic/private';
 
 // Get current host dynamically (works for both localhost and production)
 function getVaultUrl(request: Request): string {
@@ -10,6 +9,9 @@ function getVaultUrl(request: Request): string {
 }
 
 export const load: LayoutServerLoad = async ({ cookies, fetch, url, request }) => {
+	// Get environment variables at runtime (not inlined at build time)
+	const FLARUM_URL = env.FLARUM_URL || 'https://ndz.ng';
+	
 	// Get current vault URL dynamically
 	const VAULT_URL = getVaultUrl(request);
 	

@@ -1,13 +1,19 @@
 import { redirect, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import jwt from 'jsonwebtoken';
-
-const FLARUM_URL = import.meta.env.FLARUM_URL || 'https://ndz.ng';
-const JWT_SECRET = import.meta.env.JWT_SECRET || '0a4533bf6076eeb08c9f73b30f3d3c04b0bc4278b35f88b1fb48112a3b04e931';
-// JWT_ISSUER should be the domain that issues the token (dev.ndz.ng), not the consumer (ndz.ng)
-const JWT_ISSUER = import.meta.env.JWT_ISSUER || 'https://dev.ndz.ng';
+import { env } from '$env/dynamic/private';
 
 export const GET: RequestHandler = async ({ url, cookies, fetch, request }) => {
+	// Get environment variables at runtime (not inlined at build time)
+	const FLARUM_URL = env.FLARUM_URL || 'https://ndz.ng';
+	const JWT_SECRET = env.JWT_SECRET;
+	const JWT_ISSUER = env.JWT_ISSUER || new URL(request.url).origin;
+	
+	// JWT_SECRET is required - throw error if not set
+	if (!JWT_SECRET) {
+		throw error(500, 'JWT_SECRET environment variable is not configured');
+	}
+	
 	// Get return URL from Flarum (where to redirect after SSO completes)
 	const returnUrl = url.searchParams.get('return') || `${FLARUM_URL}/`;
 	
@@ -63,12 +69,10 @@ export const GET: RequestHandler = async ({ url, cookies, fetch, request }) => {
 	}
 
 	// Generate JWT token with user information for Flarum SSO
-	// Use the current origin as issuer (dev.ndz.ng) since that's where we're generating the token
-	const currentOrigin = new URL(request.url).origin;
 	const tokenPayload = {
 		iat: Math.floor(Date.now() / 1000), // Issued at
 		exp: Math.floor(Date.now() / 1000) + 300, // Expires in 5 minutes
-		iss: JWT_ISSUER || currentOrigin, // Issuer (should be dev.ndz.ng)
+		iss: JWT_ISSUER, // Issuer (should be dev.ndz.ng)
 		sub: userId.toString(), // Subject (user ID)
 		username: username,
 		email: email,
