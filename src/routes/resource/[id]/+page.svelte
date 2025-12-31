@@ -140,7 +140,7 @@
 							</button>
 							<p class="login-note">
 								Don't have an account? 
-								<a href="https://ndz.ng/register" target="_blank" rel="noopener noreferrer">Sign up on NDZ</a>
+								<a href="https://ndz.ng/signup" target="_blank" rel="noopener noreferrer">Sign up on NDZ</a>
 							</p>
 						{/if}
 					</div>

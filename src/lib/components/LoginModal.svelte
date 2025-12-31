@@ -84,7 +84,7 @@
 
 		<p class="signup-link">
 			Don't have an account? 
-			<a href="https://ndz.ng/register" target="_blank" rel="noopener noreferrer">Sign up</a>
+			<a href="https://ndz.ng/signup" target="_blank" rel="noopener noreferrer">Sign up</a>
 		</p>
 	</div>
 </div>
