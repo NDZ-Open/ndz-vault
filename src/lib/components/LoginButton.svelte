@@ -11,10 +11,11 @@
 		returnUrl = window.location.pathname + window.location.search;
 	}
 	
-	// Simple redirect to Flarum login
-	// After login, Flarum will redirect back to dev.ndz.ng
-	// hooks.server.ts will automatically detect and validate the cookie
-	const loginUrl = `${FLARUM_URL}/login?return=${encodeURIComponent(`https://dev.ndz.ng${returnUrl}`)}`;
+	// Redirect to Flarum login with return URL pointing to our callback page
+	// The callback page will then redirect to the actual resource
+	// This works around Flarum's security restrictions on external redirects
+	const callbackUrl = `https://dev.ndz.ng/auth/callback?return=${encodeURIComponent(returnUrl)}`;
+	const loginUrl = `${FLARUM_URL}/login?return=${encodeURIComponent(callbackUrl)}`;
 </script>
 
 <a 

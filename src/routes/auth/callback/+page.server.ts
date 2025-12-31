@@ -15,15 +15,15 @@ export const load: PageServerLoad = async ({ url, cookies, fetch, request }) => 
 	// Get current vault URL dynamically
 	const VAULT_URL = getVaultUrl(request);
 	
+	// Get the return URL from query params or default to home
+	const returnTo = url.searchParams.get('return') || url.searchParams.get('redirect') || '/';
+	const returnUrl = `${VAULT_URL}${returnTo}`;
+	
 	// Check if we have a session cookie
 	const sessionCookie = cookies.get('flarum_session');
-	const rememberCookie = cookies.get('flarum_remember');
 	
-	// If no session, redirect to Flarum login
+	// If no session cookie, redirect to Flarum login
 	if (!sessionCookie) {
-		// Get the return URL from query params or default to home
-		const returnTo = url.searchParams.get('return') || url.searchParams.get('redirect') || '/';
-		const returnUrl = `${VAULT_URL}${returnTo}`;
 		throw redirect(302, `${FLARUM_URL}/login?return=${encodeURIComponent(returnUrl)}`);
 	}
 
@@ -41,18 +41,18 @@ export const load: PageServerLoad = async ({ url, cookies, fetch, request }) => 
 
 		if (!response.ok) {
 			// Invalid session, redirect to login
-			const returnTo = url.searchParams.get('return') || url.searchParams.get('redirect') || '/';
-			const returnUrl = `${VAULT_URL}${returnTo}`;
 			throw redirect(302, `${FLARUM_URL}/login?return=${encodeURIComponent(returnUrl)}`);
 		}
+		
+		// Session is valid - redirect to the requested page
+		throw redirect(302, returnTo);
 	} catch (err) {
+		// If it's already a redirect, re-throw it
+		if (err instanceof Response && err.status === 302) {
+			throw err;
+		}
+		
 		// If verification fails, redirect to login
-		const returnTo = url.searchParams.get('return') || url.searchParams.get('redirect') || '/';
-		const returnUrl = `${VAULT_URL}${returnTo}`;
 		throw redirect(302, `${FLARUM_URL}/login?return=${encodeURIComponent(returnUrl)}`);
 	}
-
-	// If we have a valid session, redirect to the requested page or home
-	const returnTo = url.searchParams.get('return') || url.searchParams.get('redirect') || '/';
-	throw redirect(302, returnTo);
 };
