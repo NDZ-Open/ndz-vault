@@ -1,16 +1,8 @@
 <script lang="ts">
-	import { page } from '$app/stores';
-	import { browser } from '$app/environment';
-	
-	export let returnPath: string | null = null;
-	
 	const FLARUM_URL = 'https://ndz.ng';
-	const FLARUM_DESTINATION_PAGE = 'https://ndz.ng/p/5-ndz-vault';
 	
-	// Get current host (works for both localhost and production)
-	$: currentHost = browser ? window.location.origin : '';
-	// Redirect to Flarum login, which will show the destination page after login
-	$: loginUrl = `${FLARUM_URL}/login?return=${encodeURIComponent(FLARUM_DESTINATION_PAGE)}`;
+	// Just redirect to Flarum login - user will manually come back via "Go to NDZ Vault" link
+	const loginUrl = `${FLARUM_URL}/login`;
 </script>
 
 <a 

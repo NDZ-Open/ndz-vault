@@ -12,10 +12,9 @@
 	
 	function handleDownload() {
 		if (!isAuthenticated) {
-			// Redirect to Flarum login, which will show the destination page after login
+			// Redirect to Flarum login
 			const FLARUM_URL = 'https://ndz.ng';
-			const FLARUM_DESTINATION_PAGE = 'https://ndz.ng/p/5-ndz-vault';
-			window.location.href = `${FLARUM_URL}/login?return=${encodeURIComponent(FLARUM_DESTINATION_PAGE)}`;
+			window.location.href = `${FLARUM_URL}/login`;
 		} else {
 			// User is authenticated - handle download
 			// TODO: Implement actual download logic
