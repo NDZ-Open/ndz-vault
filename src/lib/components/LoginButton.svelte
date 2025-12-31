@@ -3,7 +3,8 @@
 	
 	export let returnPath: string | undefined = undefined;
 	
-	const FLARUM_URL = 'https://ndz.ng';
+	// Flarum forum URL
+	const FORUM_URL = 'https://ndz.ng';
 	
 	// Get the return URL - use returnPath prop if provided, otherwise use current page
 	let returnUrl = returnPath || '/';
@@ -11,18 +12,22 @@
 		returnUrl = window.location.pathname + window.location.search;
 	}
 	
-	// Redirect to Flarum login with return URL pointing to our callback page
-	// The callback page will then redirect to the actual resource
-	// This works around Flarum's security restrictions on external redirects
-	const callbackUrl = `https://dev.ndz.ng/auth/callback?return=${encodeURIComponent(returnUrl)}`;
-	const loginUrl = `${FLARUM_URL}/login?return=${encodeURIComponent(callbackUrl)}`;
+	// Get current vault URL dynamically
+	let vaultUrl = 'https://dev.ndz.ng';
+	if (browser) {
+		vaultUrl = window.location.origin;
+	}
+	
+	// Redirect to Flarum login with return URL back to vault
+	// FoF Direct Links extension will handle the redirect after login
+	const loginUrl = `${FORUM_URL}/login?return=${encodeURIComponent(`${vaultUrl}${returnUrl}`)}`;
 </script>
 
 <a 
 	href={loginUrl}
 	class="login-button"
 >
-	<slot>Continue with NDZ Account</slot>
+	<slot>Log in with NDZ Forum</slot>
 </a>
 
 <style>

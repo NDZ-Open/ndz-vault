@@ -3,7 +3,7 @@ import { env } from "$env/dynamic/private";
 
 export const handle: Handle = async ({ event, resolve }) => {
   // Get environment variables at runtime (not inlined at build time)
-  const FLARUM_URL = env.FLARUM_URL || "https://ndz.ng";
+  const FORUM_URL = env.FLARUM_URL || env.FORUM_URL || "https://ndz.ng";
 
   // Check for cookie AND validate it with Flarum
   const sessionCookie = event.cookies.get("flarum_session");
@@ -16,7 +16,7 @@ export const handle: Handle = async ({ event, resolve }) => {
       // This ensures the cookie is actually valid, not just present
       const cookieHeader = event.request.headers.get("cookie") || "";
 
-      const response = await event.fetch(`${FLARUM_URL}/api`, {
+      const response = await event.fetch(`${FORUM_URL}/api`, {
         headers: {
           Cookie: cookieHeader,
           Accept: "application/json",

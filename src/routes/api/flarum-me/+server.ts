@@ -4,7 +4,7 @@ import { env } from "$env/dynamic/private";
 
 export const GET: RequestHandler = async ({ cookies, fetch, request }) => {
   // Get environment variables at runtime (not inlined at build time)
-  const FLARUM_URL = env.FLARUM_URL || "https://ndz.ng";
+  const FORUM_URL = env.FLARUM_URL || env.FORUM_URL || "https://ndz.ng";
   
   const sessionCookie = cookies.get("flarum_session");
 
@@ -17,7 +17,7 @@ export const GET: RequestHandler = async ({ cookies, fetch, request }) => {
     // This is critical - server fetch needs explicit cookie header
     const cookieHeader = request.headers.get("cookie") || "";
 
-    const response = await fetch(`${FLARUM_URL}/api`, {
+    const response = await fetch(`${FORUM_URL}/api`, {
       headers: {
         Cookie: cookieHeader,
         Accept: "application/json",
