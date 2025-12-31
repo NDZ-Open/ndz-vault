@@ -4,7 +4,8 @@ import jwt from 'jsonwebtoken';
 
 const FLARUM_URL = import.meta.env.FLARUM_URL || 'https://ndz.ng';
 const JWT_SECRET = import.meta.env.JWT_SECRET || '0a4533bf6076eeb08c9f73b30f3d3c04b0bc4278b35f88b1fb48112a3b04e931';
-const JWT_ISSUER = import.meta.env.JWT_ISSUER || 'https://ndz.ng';
+// JWT_ISSUER should be the domain that issues the token (dev.ndz.ng), not the consumer (ndz.ng)
+const JWT_ISSUER = import.meta.env.JWT_ISSUER || 'https://dev.ndz.ng';
 
 export const GET: RequestHandler = async ({ url, cookies, fetch, request }) => {
 	// Get return URL from Flarum (where to redirect after SSO completes)
@@ -62,10 +63,12 @@ export const GET: RequestHandler = async ({ url, cookies, fetch, request }) => {
 	}
 
 	// Generate JWT token with user information for Flarum SSO
+	// Use the current origin as issuer (dev.ndz.ng) since that's where we're generating the token
+	const currentOrigin = new URL(request.url).origin;
 	const tokenPayload = {
 		iat: Math.floor(Date.now() / 1000), // Issued at
 		exp: Math.floor(Date.now() / 1000) + 300, // Expires in 5 minutes
-		iss: JWT_ISSUER, // Issuer
+		iss: JWT_ISSUER || currentOrigin, // Issuer (should be dev.ndz.ng)
 		sub: userId.toString(), // Subject (user ID)
 		username: username,
 		email: email,
