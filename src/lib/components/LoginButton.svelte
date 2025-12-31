@@ -1,28 +1,12 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
-	
-	export let returnPath: string | undefined = undefined;
-	
 	// Flarum forum URL
 	const FORUM_URL = 'https://ndz.ng';
 	
-	// Get the return URL - use returnPath prop if provided, otherwise use current page
-	let returnUrl = returnPath || '/';
-	if (browser && !returnPath) {
-		returnUrl = window.location.pathname + window.location.search;
-	}
-	
-	// Get current vault URL dynamically
-	let vaultUrl = 'https://dev.ndz.ng';
-	if (browser) {
-		vaultUrl = window.location.origin;
-	}
-	
-	// Redirect to Flarum login with return URL pointing to our callback page
-	// The callback page will validate the cookie and redirect to the actual resource
-	// This works around Flarum's security restrictions on external redirects
-	const callbackUrl = `${vaultUrl}/auth/callback?return=${encodeURIComponent(returnUrl)}`;
-	const loginUrl = `${FORUM_URL}/login?return=${encodeURIComponent(callbackUrl)}`;
+	// Simple: Just redirect to Flarum login
+	// After login, user comes back to dev.ndz.ng
+	// hooks.server.ts automatically checks the cookie on every request
+	// If cookie is valid → resource unlocks. If not → stays locked.
+	const loginUrl = `${FORUM_URL}/login`;
 </script>
 
 <a 
