@@ -6,7 +6,7 @@
 </script>
 
 <div class="card" class:inactive={!resource.isUnlocked}>
-	<a href="/resource/{resource.id}" class="card-link" data-sveltekit-preload-data="hover">
+	<a href="/resource/{resource.id}" class="card-link" rel="external">
 		<div class="card-header">
 			<div class="card-icon">{resource.icon || '📄'}</div>
 			{#if !resource.isUnlocked}

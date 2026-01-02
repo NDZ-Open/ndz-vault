@@ -2,7 +2,6 @@
 	import type { PageData } from './$types';
 	import LoginModal from '$lib/components/LoginModal.svelte';
 	import UserDropdown from '$lib/components/UserDropdown.svelte';
-	import { onMount } from 'svelte';
 	
 	export let data: PageData;
 	
@@ -11,16 +10,12 @@
 	$: user = data.user;
 	$: isAuthenticated = data.isAuthenticated || false;
 	$: hasAccess = data.hasAccess || false;
-	// Plan your Life is available to all logged-in users
-	$: canAccess = resource?.id === 'plan-your-life' ? isAuthenticated : (isAuthenticated && hasAccess);
+	// Resources without "Exclusive" tag are available to all logged-in users
+	// Resources with "Exclusive" tag require premium access
+	$: isExclusive = resource?.tags?.includes('Exclusive') || false;
+	$: canAccess = isAuthenticated && (isExclusive ? hasAccess : true);
 	
 	let showLogin = false;
-	
-	onMount(() => {
-		// Simple scroll to top
-		window.scrollTo(0, 0);
-	});
-	
 	
 	function handleDownload() {
 		if (!isAuthenticated || !user) {
@@ -143,7 +138,7 @@
 										<line x1="12" y1="15" x2="12" y2="3"></line>
 									</svg>
 								</button>
-							{:else if isAuthenticated && user && !hasAccess && resource?.id !== 'plan-your-life'}
+							{:else if isAuthenticated && user && isExclusive && !hasAccess}
 								<div class="access-denied-content">
 									<div class="access-denied-icon">🔒</div>
 									<h2 class="form-title">Premium Access Required</h2>
