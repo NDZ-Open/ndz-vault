@@ -4,6 +4,7 @@
 	import UserDropdown from '$lib/components/UserDropdown.svelte';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
+	import { afterNavigate } from '$app/navigation';
 	
 	export let data: PageData;
 	
@@ -13,6 +14,51 @@
 	$: isAuthenticated = data.isAuthenticated || false;
 	
 	let showLogin = false;
+	
+	// Scroll to top when navigating to this page
+	onMount(() => {
+		// Prevent any scroll restoration
+		if ('scrollRestoration' in history) {
+			history.scrollRestoration = 'manual';
+		}
+		
+		// Force scroll to top multiple times to catch any late rendering
+		const scrollToTop = () => {
+			window.scrollTo(0, 0);
+			document.documentElement.scrollTop = 0;
+			document.body.scrollTop = 0;
+			if (document.getElementById('resource-content')) {
+				document.getElementById('resource-content')?.scrollIntoView({ behavior: 'instant', block: 'start' });
+			}
+		};
+		
+		scrollToTop();
+		setTimeout(scrollToTop, 0);
+		setTimeout(scrollToTop, 10);
+		setTimeout(scrollToTop, 50);
+		setTimeout(scrollToTop, 100);
+		setTimeout(scrollToTop, 200);
+	});
+	
+	afterNavigate(({ to }) => {
+		// Only scroll if navigating to this resource page
+		if (to?.url.pathname.startsWith('/resource/')) {
+			if ('scrollRestoration' in history) {
+				history.scrollRestoration = 'manual';
+			}
+			
+			const scrollToTop = () => {
+				window.scrollTo(0, 0);
+				document.documentElement.scrollTop = 0;
+				document.body.scrollTop = 0;
+			};
+			
+			scrollToTop();
+			setTimeout(scrollToTop, 0);
+			setTimeout(scrollToTop, 10);
+			setTimeout(scrollToTop, 50);
+		}
+	});
 	
 	function handleDownload() {
 		if (!isAuthenticated || !user) {
@@ -90,7 +136,7 @@
 		</div>
 	</header>
 
-	<main class="resource-page">
+	<main class="resource-page" id="resource-content">
 		<div class="container">
 			<!-- Two Column Layout -->
 			<section class="landing-layout">
@@ -125,25 +171,33 @@
 				<!-- Right: Download Section -->
 				<div class="form-section">
 					<div class="form-card">
-						{#if isAuthenticated && user}
-							<button class="download-button" on:click={handleDownload}>
-								<span>Download Resource</span>
-								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-									<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-									<polyline points="7 10 12 15 17 10"></polyline>
-									<line x1="12" y1="15" x2="12" y2="3"></line>
-								</svg>
-							</button>
+						{#if resource?.isUnlocked}
+							{#if isAuthenticated && user}
+								<button class="download-button" on:click={handleDownload}>
+									<span>Download Resource</span>
+									<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+										<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+										<polyline points="7 10 12 15 17 10"></polyline>
+										<line x1="12" y1="15" x2="12" y2="3"></line>
+									</svg>
+								</button>
+							{:else}
+								<h2 class="form-title">Get Your Resource</h2>
+								<p class="form-subtitle">Unlock Resource by Signing up or login</p>
+								<button class="login-button" on:click={() => showLogin = true}>
+									Access Resource
+								</button>
+								<p class="login-note">
+									Don't have an account? 
+									<a href="https://ndz.ng/signup" target="_blank" rel="noopener noreferrer">Sign up on NDZ</a>
+								</p>
+							{/if}
 						{:else}
-							<h2 class="form-title">Get Your Resource</h2>
-							<p class="form-subtitle">Unlock Resource by Signing up or login</p>
-							<button class="login-button" on:click={() => showLogin = true}>
-								Access Resource
-							</button>
-							<p class="login-note">
-								Don't have an account? 
-								<a href="https://ndz.ng/signup" target="_blank" rel="noopener noreferrer">Sign up on NDZ</a>
-							</p>
+							<div class="coming-soon-content">
+								<div class="coming-soon-icon">⏳</div>
+								<h2 class="form-title">Coming Soon</h2>
+								<p class="form-subtitle">This resource is currently being prepared and will be available soon.</p>
+							</div>
 						{/if}
 					</div>
 				</div>
@@ -287,6 +341,20 @@
 		text-transform: uppercase;
 	}
 
+	.coming-soon-badge {
+		display: inline-flex;
+		align-items: center;
+		padding: 0.4rem 1rem;
+		background: rgba(255, 255, 255, 0.1);
+		border: 1px solid rgba(255, 255, 255, 0.2);
+		border-radius: 20px;
+		font-size: 0.75rem;
+		font-weight: 600;
+		color: var(--text-secondary);
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+	}
+
 	.badge-dot {
 		width: 6px;
 		height: 6px;
@@ -360,6 +428,18 @@
 		border: 1px solid rgba(255, 255, 255, 0.1);
 		text-align: center;
 		width: 100%;
+	}
+
+	.coming-soon-content {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+
+	.coming-soon-icon {
+		font-size: 3rem;
+		margin-bottom: 1rem;
+		opacity: 0.7;
 	}
 
 	.form-title {
@@ -616,12 +696,45 @@
 			padding: 2rem 0;
 		}
 
+		.container {
+			padding-left: 1rem;
+			padding-right: 1rem;
+		}
+
+		.landing-layout {
+			gap: 2rem;
+		}
+
 		.resource-title {
 			font-size: 2.5rem;
+			line-height: 1.2;
+		}
+
+		.resource-description {
+			font-size: 1rem;
 		}
 
 		.form-card {
 			padding: 2rem 1.5rem;
+		}
+
+		.benefits-list {
+			gap: 0.875rem;
+		}
+
+		.benefit-item {
+			font-size: 0.95rem;
+			gap: 0.875rem;
+		}
+
+		.benefit-check {
+			width: 20px;
+			height: 20px;
+			font-size: 0.8rem;
+		}
+
+		.testimonials-section {
+			padding: 2rem 0;
 		}
 	}
 
@@ -634,8 +747,96 @@
 			font-size: 0.8rem;
 		}
 
+		.resource-page {
+			padding: 1.5rem 0;
+		}
+
+		.container {
+			padding-left: 1rem;
+			padding-right: 1rem;
+			overflow-x: hidden;
+		}
+
+		.landing-layout {
+			gap: 2rem;
+		}
+
 		.resource-title {
-			font-size: 2rem;
+			font-size: 1.75rem;
+			line-height: 1.2;
+		}
+
+		.resource-description {
+			font-size: 0.95rem;
+			line-height: 1.6;
+		}
+
+		.category-badge {
+			font-size: 0.7rem;
+			padding: 0.35rem 0.85rem;
+		}
+
+		.coming-soon-badge {
+			font-size: 0.7rem;
+			padding: 0.35rem 0.85rem;
+		}
+
+		.form-card {
+			padding: 1.5rem 1rem;
+		}
+
+		.form-title {
+			font-size: 1.5rem;
+		}
+
+		.form-subtitle {
+			font-size: 0.9rem;
+		}
+
+		.download-button,
+		.login-button {
+			padding: 1.25rem 2rem;
+			font-size: 1rem;
+		}
+
+		.benefits-list {
+			gap: 0.75rem;
+		}
+
+		.benefit-item {
+			font-size: 0.875rem;
+			gap: 0.75rem;
+		}
+
+		.benefit-check {
+			width: 18px;
+			height: 18px;
+			font-size: 0.75rem;
+		}
+
+		.testimonials-section {
+			padding: 1.5rem 0;
+		}
+
+		.testimonials-container {
+			padding: 0 1rem;
+		}
+
+		.testimonial-card {
+			width: 260px;
+			padding: 1.25rem;
+		}
+
+		.testimonial-text {
+			font-size: 0.85rem;
+		}
+
+		.author-name {
+			font-size: 0.9rem;
+		}
+
+		.author-role {
+			font-size: 0.75rem;
 		}
 	}
 </style>

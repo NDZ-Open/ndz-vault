@@ -5,6 +5,7 @@ export interface Resource {
 	category: string;
 	tags: string[];
 	icon: string;
+	isUnlocked?: boolean;
 }
 
 export interface Category {
@@ -34,7 +35,8 @@ export const resources: Resource[] = [
 		description: 'Professional CV templates tailored for junior dev, designer, PM, VA, copywriter roles. Stand out in remote job applications.',
 		category: 'career-remote',
 		tags: ['CV', 'Resume', 'Remote Work'],
-		icon: '📄'
+		icon: '📄',
+		isUnlocked: true
 	},
 	{
 		id: 'linkedin-templates',
@@ -42,7 +44,8 @@ export const resources: Resource[] = [
 		description: 'High-converting LinkedIn profile templates that get you noticed by recruiters and hiring managers.',
 		category: 'career-remote',
 		tags: ['LinkedIn', 'Profile', 'Networking'],
-		icon: '💼'
+		icon: '💼',
+		isUnlocked: true
 	},
 	{
 		id: 'cold-email-scripts',
@@ -50,7 +53,8 @@ export const resources: Resource[] = [
 		description: 'Proven email and DM templates that get responses from hiring managers and recruiters.',
 		category: 'career-remote',
 		tags: ['Email', 'Outreach', 'Networking'],
-		icon: '📧'
+		icon: '📧',
+		isUnlocked: true
 	},
 	{
 		id: 'portfolio-template',

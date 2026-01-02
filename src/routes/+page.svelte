@@ -314,7 +314,7 @@
 
 	.hero-subtitle {
 		font-size: 1.2rem;
-		color: var(--text-secondary);
+		color: rgba(255, 255, 255, 0.7);
 		margin-bottom: 2.5rem;
 		line-height: 1.6;
 	}

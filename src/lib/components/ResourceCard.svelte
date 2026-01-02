@@ -4,9 +4,12 @@
 	export let resource: Resource;
 </script>
 
-<a href="/resource/{resource.id}" class="card">
+<a href="/resource/{resource.id}" class="card" class:inactive={!resource.isUnlocked} data-sveltekit-preload-data="hover">
 	<div class="card-header">
 		<div class="card-icon">{resource.icon || '📄'}</div>
+		{#if !resource.isUnlocked}
+			<span class="coming-soon-badge">Coming Soon</span>
+		{/if}
 	</div>
 	<div class="card-content">
 		<h3 class="card-title">{resource.title}</h3>
@@ -29,7 +32,20 @@
 		border: 1px solid rgba(255, 255, 255, 0.05);
 	}
 
-	.card:hover {
+	.card.inactive {
+		opacity: 0.6;
+		filter: grayscale(0.3);
+		cursor: default;
+	}
+
+	.card.inactive:hover {
+		opacity: 0.7;
+		transform: none;
+		box-shadow: none;
+		border-color: rgba(255, 255, 255, 0.05);
+	}
+
+	.card:not(.inactive):hover {
 		transform: translateY(-4px);
 		box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 		border-color: rgba(0, 235, 152, 0.3);
@@ -37,6 +53,10 @@
 
 	.card-header {
 		margin-bottom: 1rem;
+		position: relative;
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
 	}
 
 	.card-icon {
@@ -48,6 +68,20 @@
 		justify-content: center;
 		background: rgba(0, 235, 152, 0.1);
 		border-radius: 10px;
+	}
+
+	.coming-soon-badge {
+		display: inline-flex;
+		align-items: center;
+		padding: 0.25rem 0.75rem;
+		background: rgba(255, 255, 255, 0.1);
+		border: 1px solid rgba(255, 255, 255, 0.2);
+		border-radius: 12px;
+		font-size: 0.7rem;
+		font-weight: 600;
+		color: var(--text-secondary);
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
 	}
 
 	.card-content {
@@ -95,10 +129,20 @@
 			min-width: 0;
 		}
 
+		.card-header {
+			flex-wrap: wrap;
+			gap: 0.5rem;
+		}
+
 		.card-icon {
 			font-size: 1.75rem;
 			width: 44px;
 			height: 44px;
+		}
+
+		.coming-soon-badge {
+			font-size: 0.65rem;
+			padding: 0.2rem 0.6rem;
 		}
 
 		.card-title {
