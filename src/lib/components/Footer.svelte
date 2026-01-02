@@ -30,7 +30,7 @@
 		<div class="footer-divider"></div>
 		
 		<p class="footer-copyright">
-			© 2025 NDZ Vault. All rights reserved.
+			© 2026 NDZ Vault. All rights reserved.
 		</p>
 	</div>
 </footer>
