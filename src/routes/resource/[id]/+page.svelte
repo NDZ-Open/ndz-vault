@@ -11,6 +11,8 @@
 	$: user = data.user;
 	$: isAuthenticated = data.isAuthenticated || false;
 	$: hasAccess = data.hasAccess || false;
+	// Plan your Life is available to all logged-in users
+	$: canAccess = resource?.id === 'plan-your-life' ? isAuthenticated : (isAuthenticated && hasAccess);
 	
 	let showLogin = false;
 	
@@ -132,7 +134,7 @@
 				<div class="form-section">
 					<div class="form-card">
 						{#if resource?.isUnlocked}
-							{#if isAuthenticated && user && hasAccess}
+							{#if canAccess}
 								<button class="download-button" on:click={handleDownload}>
 									<span>Download Resource</span>
 									<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -141,7 +143,7 @@
 										<line x1="12" y1="15" x2="12" y2="3"></line>
 									</svg>
 								</button>
-							{:else if isAuthenticated && user && !hasAccess}
+							{:else if isAuthenticated && user && !hasAccess && resource?.id !== 'plan-your-life'}
 								<div class="access-denied-content">
 									<div class="access-denied-icon">🔒</div>
 									<h2 class="form-title">Premium Access Required</h2>
