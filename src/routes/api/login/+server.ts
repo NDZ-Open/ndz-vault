@@ -41,10 +41,22 @@ export const POST: RequestHandler = async ({ request }) => {
 
 		const userData = await userRes.json();
 		const user = userData.data.attributes;
+		
+		// Get user's groups
+		const groups = userData.data.relationships?.groups?.data?.map((g: { id: string }) => g.id) || [];
+		
+		// Check if user is in group ID 13 (premium/access group)
+		const hasAccess = groups.includes('13') || groups.includes(13);
 
 		// Create our own JWT
 		const token = jwt.sign(
-			{ id: userId, username: user.username, email: user.email, displayName: user.displayName },
+			{ 
+				id: userId, 
+				username: user.username, 
+				email: user.email, 
+				displayName: user.displayName,
+				hasAccess // Add access status to JWT
+			},
 			JWT_SECRET,
 			{ expiresIn: '30d' }
 		);
@@ -55,7 +67,8 @@ export const POST: RequestHandler = async ({ request }) => {
 				id: userId, 
 				username: user.username, 
 				displayName: user.displayName || user.username,
-				email: user.email
+				email: user.email,
+				hasAccess
 			} 
 		});
 	} catch (err) {

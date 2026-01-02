@@ -2,34 +2,45 @@
 	import type { Resource } from '$lib/data/resources';
 	
 	export let resource: Resource;
+	export let isAuthenticated: boolean = false;
 </script>
 
-<a href="/resource/{resource.id}" class="card" class:inactive={!resource.isUnlocked} data-sveltekit-preload-data="hover">
-	<div class="card-header">
-		<div class="card-icon">{resource.icon || '📄'}</div>
-		{#if !resource.isUnlocked}
-			<span class="coming-soon-badge">Coming Soon</span>
-		{/if}
-	</div>
-	<div class="card-content">
-		<h3 class="card-title">{resource.title}</h3>
-		<p class="card-description">{resource.description}</p>
-		<div class="card-tags">
-			{#each resource.tags as tag}
-				<span class="tag">{tag}</span>
-			{/each}
+<div class="card" class:inactive={!resource.isUnlocked}>
+	<a href="/resource/{resource.id}" class="card-link" data-sveltekit-preload-data="hover">
+		<div class="card-header">
+			<div class="card-icon">{resource.icon || '📄'}</div>
+			{#if !resource.isUnlocked}
+				<span class="coming-soon-badge">Coming Soon</span>
+			{/if}
 		</div>
-	</div>
-</a>
+		<div class="card-content">
+			<h3 class="card-title">{resource.title}</h3>
+			<p class="card-description">{resource.description}</p>
+			<div class="card-tags">
+				{#each resource.tags as tag}
+					<span class="tag" class:exclusive={tag === 'Exclusive'}>{tag}</span>
+				{/each}
+			</div>
+		</div>
+	</a>
+</div>
 
 <style>
 	.card {
-		display: block;
+		display: flex;
+		flex-direction: column;
 		background-color: var(--section-bg);
 		border-radius: 12px;
 		padding: 1.5rem;
 		transition: all 0.3s ease;
 		border: 1px solid rgba(255, 255, 255, 0.05);
+	}
+
+	.card-link {
+		display: block;
+		text-decoration: none;
+		color: inherit;
+		flex: 1;
 	}
 
 	.card.inactive {
@@ -118,6 +129,16 @@
 		font-size: 0.8rem;
 		color: var(--text-secondary);
 		font-weight: 500;
+	}
+
+	.tag.exclusive {
+		background: rgba(0, 235, 152, 0.15);
+		border: 1px solid var(--button-color);
+		color: var(--button-color);
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+		font-size: 0.75rem;
 	}
 
 	@media (max-width: 640px) {

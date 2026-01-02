@@ -4,6 +4,8 @@
 	
 	const dispatch = createEventDispatcher();
 	
+	export let title: string = 'Login with NDZ Account';
+	
 	let username = '';
 	let password = '';
 	let error = '';
@@ -44,7 +46,7 @@
 
 <div class="modal-overlay" on:click={() => dispatch('close')}>
 	<div class="modal-content" on:click|stopPropagation>
-		<h2 class="modal-title">Login with NDZ Account</h2>
+		<h2 class="modal-title">{title}</h2>
 		
 		<form on:submit|preventDefault={handleLogin}>
 			<div class="form-group">

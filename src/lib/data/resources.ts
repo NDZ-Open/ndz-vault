@@ -6,6 +6,7 @@ export interface Resource {
 	tags: string[];
 	icon: string;
 	isUnlocked?: boolean;
+	voteCount?: number;
 }
 
 export interface Category {
@@ -28,6 +29,17 @@ export const categories: Category[] = [
 ];
 
 export const resources: Resource[] = [
+	// Personal Systems
+	{
+		id: 'plan-your-life',
+		title: 'Plan your Life',
+		description: 'A comprehensive life planning framework to help you define your values, set meaningful goals, and create a roadmap for the life you want to live.',
+		category: 'personal-systems',
+		tags: ['Planning', 'Life Goals', 'Personal Development'],
+		icon: '🧭',
+		isUnlocked: true
+	},
+	
 	// Career & Remote Work
 	{
 		id: 'remote-cv-templates',
@@ -35,8 +47,7 @@ export const resources: Resource[] = [
 		description: 'Professional CV templates tailored for junior dev, designer, PM, VA, copywriter roles. Stand out in remote job applications.',
 		category: 'career-remote',
 		tags: ['CV', 'Resume', 'Remote Work'],
-		icon: '📄',
-		isUnlocked: true
+		icon: '📄'
 	},
 	{
 		id: 'linkedin-templates',
@@ -44,8 +55,7 @@ export const resources: Resource[] = [
 		description: 'High-converting LinkedIn profile templates that get you noticed by recruiters and hiring managers.',
 		category: 'career-remote',
 		tags: ['LinkedIn', 'Profile', 'Networking'],
-		icon: '💼',
-		isUnlocked: true
+		icon: '💼'
 	},
 	{
 		id: 'cold-email-scripts',
@@ -53,8 +63,7 @@ export const resources: Resource[] = [
 		description: 'Proven email and DM templates that get responses from hiring managers and recruiters.',
 		category: 'career-remote',
 		tags: ['Email', 'Outreach', 'Networking'],
-		icon: '📧',
-		isUnlocked: true
+		icon: '📧'
 	},
 	{
 		id: 'portfolio-template',
@@ -215,6 +224,56 @@ export const resources: Resource[] = [
 		category: 'productivity',
 		tags: ['Focus', 'Distraction', 'Wellness'],
 		icon: '🔕'
+	},
+	{
+		id: 'ndz-productivity-kickstart',
+		title: 'NDZ productivity kickstart course',
+		description: '1-hour live or recorded course to jumpstart your productivity journey with proven NDZ frameworks and systems.',
+		category: 'productivity',
+		tags: ['Exclusive', 'Course', 'Kickstart', 'Productivity'],
+		icon: '🚀',
+		isUnlocked: true
+	},
+	{
+		id: '30-day-journaling-prompts',
+		title: '30-day guided journaling prompts',
+		description: 'Daily journaling prompts in PDF format to build self-awareness, clarity, and intentional living habits.',
+		category: 'productivity',
+		tags: ['Exclusive', 'Journaling', 'PDF', 'Daily Practice'],
+		icon: '📔',
+		isUnlocked: true
+	},
+	{
+		id: 'weekly-review-time-blocking',
+		title: 'Weekly review and time-blocking templates',
+		description: 'Printable and digital templates (Notion/Google Docs) for weekly reviews and effective time-blocking strategies.',
+		category: 'productivity',
+		tags: ['Exclusive', 'Time-Blocking', 'Templates', 'Weekly Review'],
+		icon: '📅'
+	},
+	{
+		id: '14-day-accountability-sprint',
+		title: '14-day accountability sprint',
+		description: 'Structured 14-day program with daily check-ins via WhatsApp, Telegram, or email to build consistency and momentum.',
+		category: 'productivity',
+		tags: ['Exclusive', 'Accountability', 'Sprint', 'Check-ins'],
+		icon: '💪'
+	},
+	{
+		id: 'ndz-productivity-toolkit',
+		title: 'NDZ productivity toolkit',
+		description: 'Curated collection of productivity apps and tools with a comprehensive guide on how to integrate them with your journaling practice.',
+		category: 'productivity',
+		tags: ['Exclusive', 'Toolkit', 'Apps', 'Integration Guide'],
+		icon: '🛠️'
+	},
+	{
+		id: 'micro-training-pack',
+		title: 'Micro-training pack: planning and focus videos',
+		description: '5 short video tutorials covering essential productivity skills: planning, focus techniques, and weekly review systems.',
+		category: 'productivity',
+		tags: ['Exclusive', 'Training', 'Videos', 'Micro-Learning'],
+		icon: '🎥'
 	},
 	
 	// Personal Systems

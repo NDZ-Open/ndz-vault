@@ -2,21 +2,30 @@
 	import { categories, getAllResources, type Resource, type Category } from '$lib/data/resources';
 	import ResourceCard from '$lib/components/ResourceCard.svelte';
 	import UserDropdown from '$lib/components/UserDropdown.svelte';
+	import LoginModal from '$lib/components/LoginModal.svelte';
 	import type { LayoutData } from './$types';
 	
 	export let data: LayoutData;
 	
 	let selectedCategory: string | null = null;
 	let searchQuery = '';
+	let showLogin = false;
 	
-	$: filteredResources = getAllResources().filter(resource => {
-		const matchesCategory = !selectedCategory || resource.category === selectedCategory;
-		const matchesSearch = !searchQuery || 
-			resource.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-			resource.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-			resource.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-		return matchesCategory && matchesSearch;
-	});
+	$: filteredResources = getAllResources()
+		.filter(resource => {
+			const matchesCategory = !selectedCategory || resource.category === selectedCategory;
+			const matchesSearch = !searchQuery || 
+				resource.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+				resource.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+				resource.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+			return matchesCategory && matchesSearch;
+		})
+		.sort((a, b) => {
+			// Unlocked resources first
+			if (a.isUnlocked && !b.isUnlocked) return -1;
+			if (!a.isUnlocked && b.isUnlocked) return 1;
+			return 0;
+		});
 	
 	$: totalResources = getAllResources().length;
 	
@@ -116,7 +125,11 @@
 					
 					<div class="resources-grid">
 						{#each filteredResources as resource}
-							<ResourceCard {resource} />
+							<ResourceCard 
+								{resource} 
+								isAuthenticated={!!data.user}
+								on:showLogin={() => showLogin = true}
+							/>
 						{/each}
 					</div>
 					
@@ -130,6 +143,10 @@
 		</div>
 	</section>
 </main>
+
+{#if showLogin}
+	<LoginModal on:close={() => showLogin = false} />
+{/if}
 
 <style>
 	.header {

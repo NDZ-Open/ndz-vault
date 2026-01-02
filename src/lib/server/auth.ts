@@ -7,7 +7,13 @@ export function verifyToken(token: string) {
 		if (!JWT_SECRET) {
 			return null;
 		}
-		return jwt.verify(token, JWT_SECRET) as { id: number; username: string; email: string; displayName?: string };
+		return jwt.verify(token, JWT_SECRET) as { 
+			id: number; 
+			username: string; 
+			email: string; 
+			displayName?: string;
+			hasAccess?: boolean;
+		};
 	} catch {
 		return null;
 	}

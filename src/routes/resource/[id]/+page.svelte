@@ -2,9 +2,7 @@
 	import type { PageData } from './$types';
 	import LoginModal from '$lib/components/LoginModal.svelte';
 	import UserDropdown from '$lib/components/UserDropdown.svelte';
-	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { afterNavigate } from '$app/navigation';
 	
 	export let data: PageData;
 	
@@ -12,53 +10,15 @@
 	$: category = data.category;
 	$: user = data.user;
 	$: isAuthenticated = data.isAuthenticated || false;
+	$: hasAccess = data.hasAccess || false;
 	
 	let showLogin = false;
 	
-	// Scroll to top when navigating to this page
 	onMount(() => {
-		// Prevent any scroll restoration
-		if ('scrollRestoration' in history) {
-			history.scrollRestoration = 'manual';
-		}
-		
-		// Force scroll to top multiple times to catch any late rendering
-		const scrollToTop = () => {
-			window.scrollTo(0, 0);
-			document.documentElement.scrollTop = 0;
-			document.body.scrollTop = 0;
-			if (document.getElementById('resource-content')) {
-				document.getElementById('resource-content')?.scrollIntoView({ behavior: 'instant', block: 'start' });
-			}
-		};
-		
-		scrollToTop();
-		setTimeout(scrollToTop, 0);
-		setTimeout(scrollToTop, 10);
-		setTimeout(scrollToTop, 50);
-		setTimeout(scrollToTop, 100);
-		setTimeout(scrollToTop, 200);
+		// Simple scroll to top
+		window.scrollTo(0, 0);
 	});
 	
-	afterNavigate(({ to }) => {
-		// Only scroll if navigating to this resource page
-		if (to?.url.pathname.startsWith('/resource/')) {
-			if ('scrollRestoration' in history) {
-				history.scrollRestoration = 'manual';
-			}
-			
-			const scrollToTop = () => {
-				window.scrollTo(0, 0);
-				document.documentElement.scrollTop = 0;
-				document.body.scrollTop = 0;
-			};
-			
-			scrollToTop();
-			setTimeout(scrollToTop, 0);
-			setTimeout(scrollToTop, 10);
-			setTimeout(scrollToTop, 50);
-		}
-	});
 	
 	function handleDownload() {
 		if (!isAuthenticated || !user) {
@@ -151,7 +111,7 @@
 						{resource.title}
 					</h1>
 					<p class="resource-description">{resource.description}</p>
-
+					
 					<div class="benefits-list">
 						<div class="benefit-item">
 							<div class="benefit-check">✓</div>
@@ -172,7 +132,7 @@
 				<div class="form-section">
 					<div class="form-card">
 						{#if resource?.isUnlocked}
-							{#if isAuthenticated && user}
+							{#if isAuthenticated && user && hasAccess}
 								<button class="download-button" on:click={handleDownload}>
 									<span>Download Resource</span>
 									<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -181,6 +141,12 @@
 										<line x1="12" y1="15" x2="12" y2="3"></line>
 									</svg>
 								</button>
+							{:else if isAuthenticated && user && !hasAccess}
+								<div class="access-denied-content">
+									<div class="access-denied-icon">🔒</div>
+									<h2 class="form-title">Premium Access Required</h2>
+									<p class="form-subtitle">This resource is available to premium members only. Upgrade your account to access this content.</p>
+								</div>
 							{:else}
 								<h2 class="form-title">Get Your Resource</h2>
 								<p class="form-subtitle">Unlock Resource by Signing up or login</p>
@@ -442,6 +408,18 @@
 		opacity: 0.7;
 	}
 
+	.access-denied-content {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+
+	.access-denied-icon {
+		font-size: 3rem;
+		margin-bottom: 1rem;
+		opacity: 0.7;
+	}
+
 	.form-title {
 		font-size: 1.75rem;
 		font-weight: 700;
@@ -517,6 +495,16 @@
 		font-size: 0.8rem;
 		color: var(--text-secondary);
 		font-weight: 500;
+	}
+
+	.tag.exclusive {
+		background: rgba(0, 235, 152, 0.15);
+		border: 1px solid var(--button-color);
+		color: var(--button-color);
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+		font-size: 0.75rem;
 	}
 
 	.login-button {

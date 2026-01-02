@@ -16,7 +16,9 @@ declare global {
 				email: string;
 				avatarUrl: string | null;
 				authenticated: boolean;
+				hasAccess?: boolean;
 			} | null;
+			hasAccess?: boolean;
 		}
 		interface LayoutData {
 			user?: {
@@ -25,6 +27,7 @@ declare global {
 				displayName: string;
 				email: string;
 				avatarUrl: string | null;
+				hasAccess?: boolean;
 			} | null;
 		}
 		// interface PageState {}

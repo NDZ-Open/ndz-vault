@@ -49,16 +49,27 @@ export const load: PageServerLoad = async ({ params, cookies, fetch, request }) 
 							email !== '' &&
 							email.includes('@')
 						) {
+							// Get user's groups from Flarum API
+							const groups = userData.relationships?.groups?.data?.map((g: { id: string }) => g.id) || [];
+							const hasAccess = groups.includes('13') || groups.includes(13);
+							
 							user = { 
 								id: userId, 
 								username: username,
 								email: email,
-								displayName: attrs.displayName || username
+								displayName: attrs.displayName || username,
+								hasAccess
 							};
 							
 							// Create vault token for future requests
 							const vaultToken = jwt.sign(
-								{ id: user.id, username: user.username, email: user.email, displayName: user.displayName },
+								{ 
+									id: user.id, 
+									username: user.username, 
+									email: user.email, 
+									displayName: user.displayName,
+									hasAccess
+								},
 								JWT_SECRET,
 								{ expiresIn: '30d' }
 							);
@@ -83,6 +94,7 @@ export const load: PageServerLoad = async ({ params, cookies, fetch, request }) 
 		resource,
 		category,
 		user,
-		isAuthenticated: !!user
+		isAuthenticated: !!user,
+		hasAccess: user?.hasAccess || false
 	};
 };
